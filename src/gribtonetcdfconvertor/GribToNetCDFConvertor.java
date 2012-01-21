@@ -13,7 +13,11 @@ import LRFD.Db.NetCDFFile.*;
 
 import ucar.nc2.*;
 import ucar.ma2.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 
 /**
  *
@@ -24,8 +28,25 @@ public class GribToNetCDFConvertor
 	private static String latName = "lat";
 	private static String lonName = "lon";
 	
+	private static Map<Integer, String> getVariablesByNums(NetcdfFile cdf) throws IOException
+	{
+		List<Variable> variables = cdf.getVariables();
+		
+		Map<Integer, String> map = new HashMap<Integer, String>();
+		/*я не нашел как сделать через итераторы, поэтому сделал так*/
+		for(int i = 0; i < variables.size(); ++i)
+		{ 
+			Attribute atr = variables.get(i).findAttribute("GRIB_param_number");
+			
+			if (atr != null)
+				map.put((int)atr.getValue(0), variables.get(i).getName());
+		}
+		
+		return map;
+	}
+	
 	private static double[] loadCoords(NetcdfFile cdf, String coordinate) throws IOException
-   {
+	{
 		Variable latitude = cdf.findVariable(coordinate);
 		ucar.ma2.Array lats = latitude.read();
 		int n = (int)lats.getSize();
@@ -37,8 +58,6 @@ public class GribToNetCDFConvertor
 		}
 		return lat;
 	}
-	
-
 	
 	public static double[][] get2DField(NetcdfFile cdf, String variableName, double[] lat, double[] lon) throws IOException
 	{
@@ -78,11 +97,13 @@ public class GribToNetCDFConvertor
 		{
 			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
 			
+			Map<Integer, String> variables = getVariablesByNums(cdf);
+			
 			double lat[]=loadCoords(cdf, latName);
 			double lon[]=loadCoords(cdf, lonName);
 			
-			{
-				String field = "v_wind";
+			{	
+				String field = variables.get(34); //"v_wind";
 				System.out.println(field);
 
 				double [][] data = get2DField(cdf, field, lat, lon);
