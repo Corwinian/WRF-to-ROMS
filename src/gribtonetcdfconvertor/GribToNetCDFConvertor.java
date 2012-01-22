@@ -28,6 +28,32 @@ public class GribToNetCDFConvertor
 	private static String latName = "lat";
 	private static String lonName = "lon";
 	
+	private static int[] neededValues = {
+		1,//Surface pressure
+		7,//Terrain height
+		13,//Skin potential temperature
+		51,//Skin specific humidity
+		52,//Skin Relative humidity
+		11,//Skin temperature
+		33,//10 M u component wind
+		34,//10 M v component wind
+		204,//Incoming surface shortwave radiation — time-averaged
+		205,//Incoming surface longwave radiation - time-averaged
+		211,//Outgoing surface shortwave radiation - time-averaged			
+		212,//Outgoing surface longwave radiation – time-averaged
+		124,//Surface u wind stress
+		125,//Surface v wind stress
+		122,//Surface sensible heat flux — time-averaged
+		155,//Ground heat flux — time-averaged
+		121,//Surface latent heat flux — time-averaged
+		172,//Surface momentum flux — time-averaged
+		91,//Sea ice mask
+		92,//Ice thickness
+		81,//Land sea mask (land=1, sea=0)
+		154,//Accumulated land surface model precipitation
+		57,//Accumulated surface evaporation
+	};
+	
 	private static Map<Integer, String> getVariablesByNums(NetcdfFile cdf) throws IOException
 	{
 		List<Variable> variables = cdf.getVariables();
