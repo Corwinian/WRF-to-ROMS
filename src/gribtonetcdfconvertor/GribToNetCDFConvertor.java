@@ -128,13 +128,23 @@ public class GribToNetCDFConvertor
 			double lat[]=loadCoords(cdf, latName);
 			double lon[]=loadCoords(cdf, lonName);
 			
+			createNetCdfFile(outFile, lat, lon, variables);
+			
+			for(int i =0; i < neededValues.length; ++i)
 			{	
-				String field = variables.get(34); //"v_wind";
+				String field = variables.get(neededValues[i]);
+				
+				if (field == null)
+				{
+					System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
+					continue;
+				}
+				
 				System.out.println(field);
 
 				double [][] data = get2DField(cdf, field, lat, lon);
 
-				Write2DFieldToNetcdf(outFile, lat, lon, data, lonName, latName, field);
+				NetCDFOperator.writeFieldToNetCDF(outFile, field, data);
 			}
 		}
 		finally
@@ -143,62 +153,75 @@ public class GribToNetCDFConvertor
 		}
 	}
 	
-	public static void Write2DFieldToNetcdf(String dstFile, double latitude[], double longitude[], double vals[][],
-			String lon_name, String lat_name, String val_name)
-	{
-		NetcdfFileWriteable cdf=null;
-		int LONNUM = longitude.length,
-			LATNUM = latitude.length;
-		
+	public static void createNetCdfFile(String dstFile, double latitude[], double longitude[], Map<Integer, String> variables) 
+    {
+        NetcdfFileWriteable cdf=null;
+        int LONNUM = longitude.length;
+        int LATNUM = latitude.length;
+        
 		try
-		{
-			cdf = NetcdfFileWriteable.createNew(dstFile);
-			Dimension lonDim = cdf.addDimension(lon_name, LONNUM),
-					 latDim = cdf.addDimension(lat_name, LATNUM);
+        {
+			File outFile = new File(dstFile);
+            if (outFile.exists()) 
+				outFile.delete();
 			
-			Dimension[] lodim = new Dimension[1];
-			lodim[0] = lonDim;
-			cdf.addVariable(lon_name, DataType.DOUBLE, lodim);
+            cdf = NetcdfFileWriteable.createNew(dstFile);
+            Dimension lonDim=cdf.addDimension(lonName, LONNUM),
+					latDim=cdf.addDimension(latName, LATNUM);
 			
-			Dimension[] ladim = new Dimension[1];
-			ladim[0] = latDim;
-			cdf.addVariable(lat_name, DataType.DOUBLE, ladim);
+            Dimension[] lodim=new Dimension[1];
+            lodim[0]=lonDim;
+            cdf.addVariable(lonName, DataType.DOUBLE, lodim);
 			
-			Dimension[] todim = new Dimension[2];
-			todim[0] = latDim;
-			todim[1] = lonDim;
-			Variable var = cdf.addVariable(val_name, DataType.DOUBLE, todim);
-            Attribute att = new Attribute("_FillValue", -9999);
+            Dimension[] ladim=new Dimension[1];
+            ladim[0]=latDim;
+            cdf.addVariable(latName, DataType.DOUBLE, ladim);
+			
+			Attribute att = new Attribute("_FillValue", -9999);
             Attribute att1 = new Attribute("missing_value", -9999);
-            var.addAttribute(att);
-            var.addAttribute(att1);
+			
+			//TODO: заменить потом на итераторы
+			for (int i = 0; i < neededValues.length; ++i)
+			{
+				Dimension[] todim=new Dimension[2];
+				todim[0] = latDim;
+				todim[1] = lonDim;
+				
+				String field = variables.get(neededValues[i]);
+				
+				if (field == null)
+					continue;
+				
+				Variable var = cdf.addVariable(field, DataType.DOUBLE, todim);
+				
+				var.addAttribute(att);
+				var.addAttribute(att1);
+			}
 			
 			cdf.create();
-			cdf.close();
-			
-			NetCDFOperator.writeTimeToNetCDF(dstFile, lon_name, longitude);
-			NetCDFOperator.writeTimeToNetCDF(dstFile, lat_name, latitude);
-			NetCDFOperator.writeFieldToNetCDF(dstFile, val_name, vals);
-		}
-		catch (Exception er)
-		{
-			er.printStackTrace();
-		}
+            cdf.close();
+            
+			NetCDFOperator.writeTimeToNetCDF(dstFile, lonName, longitude);
+            NetCDFOperator.writeTimeToNetCDF(dstFile, latName, latitude);
+        }
+        catch (Exception er)
+        {
+            er.printStackTrace();
+        }
 	}
-   
+	
    /**
 	* @param args the command line arguments
 	*/
 	public static void main(String[] args) throws IOException
 	{
-		String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
+		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
+		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
 		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
 	   
 		File fIn = new File(fileIn);
-		File fOut = new File(fileOut);
+		//File fOut = new File(fileOut);
 		
-		if (fOut.exists()) 
-			fOut.delete();
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
 		GribToNetCDFConvert(fIn, fileOut);
