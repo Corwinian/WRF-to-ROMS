@@ -16,6 +16,7 @@ import ucar.ma2.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.HashMap;
 
 
@@ -25,12 +26,118 @@ import java.util.HashMap;
  */
 public class GribToNetCDFConvertor 
 {
+	public static class RomsGrid
+	{
+		public class grid
+		{
+			public double[] lat;
+			public double[] lon;
+			
+			public String lon_name, lat_name;
+			
+			public grid (NetcdfFile cdf, String lonName, String latName) throws IOException
+			{
+				lon = GribToNetCDFConvertor.loadCoords(cdf, lon_name = lonName);
+				lat = GribToNetCDFConvertor.loadCoords(cdf, lat_name = latName);
+			}
+			
+			public  Map<String, Dimension> createDimension(NetcdfFileWriteable cdf) throws IOException
+			{
+				HashMap<String, Dimension> res = new HashMap();
+		
+				Dimension lonDim=cdf.addDimension(lon_name, lon.length),
+						latDim=cdf.addDimension(lat_name, lat.length);
+		
+				Dimension[] lodim=new Dimension[1];
+				lodim[0]=lonDim;
+				cdf.addVariable(lon_name, DataType.DOUBLE, lodim);
+				
+				Dimension[] latim=new Dimension[1];
+				latim[0] = latDim;
+				cdf.addVariable(lat_name, DataType.DOUBLE, latim);
+				
+				res.put(lat_name, latDim);
+				res.put(lon_name, lonDim);
+				
+				return res;
+			}
+		};
+		
+		public static grid rho, psi, u, v;
+		
+		RomsGrid(String road) throws IOException
+		{
+			NetcdfFile cdf = NetcdfFile.open(road);
+			
+			rho = new grid(cdf, "lon_rho", "lat_rho" );
+			psi = new grid(cdf, "lon_psi", "lat_psi" );
+			u = new grid(cdf, "lon_u", "lat_u" );
+			v = new grid(cdf, "lon_v", "lat_v" );
+		}
+		
+		public static GeoRectangle getRectangle() throws Exception
+		{
+			return new GeoRectangle( (float)u.lat[0] - 4, 
+					(float)u.lat[u.lat.length-1] + 4,
+					(float)u.lon[0] - 4,
+					(float)u.lon[u.lon.length-1] + 4);
+		}
+		
+		public static Map<String, Dimension> createDimension(NetcdfFileWriteable cdf) throws IOException
+		{
+			HashMap<String, Dimension> res = new HashMap();
+			
+			res.putAll(rho.createDimension(cdf));
+			res.putAll(psi.createDimension(cdf));
+			res.putAll(u.createDimension(cdf));
+			res.putAll(v.createDimension(cdf));
+			
+			return res;
+		}
+		
+		public static double[] getParam(String name)
+		{
+			switch(name)
+			{
+				case "lon_rho":
+					return rho.lon;
+				case "lat_rho":
+					return rho.lat;
+				case "lon_psi":
+					return psi.lon;
+				case "lat_psi":
+					return psi.lat;
+				case "lon_u":
+					return u.lon;
+				case "lat_u":
+					return u.lat;
+				case "lon_v":
+					return v.lon;
+				case "lat_v":
+					return v.lat;
+				default:
+					return null;
+			}
+			
+		}
+		
+	};
+	
 	private static String latName = "lat";
 	private static String lonName = "lon";
 	private static String timeName = "time";
 	private static String time1Name = "time1";
 	private static String levelName = "height_above_ground";
 	private static String level1Name = "height_above_ground1";
+	
+//			"lon_rho"
+//			"lat_rho"
+//			"lon_psi"
+//			"lat_psi"
+//			"lon_u"
+//			"lat_u"
+//			"lon_v"
+//			"lat_v"
 	
 	
 	private static int[] neededValues = {
@@ -334,51 +441,69 @@ public class GribToNetCDFConvertor
 		return new Data3DField(res, lat, lon, time);
 	}
 	
-	public static Data3DField InterpolateField(Data3DField field, double[] res_lat, double[] res_lon) throws Exception
+	public static Data3DField InterpolateField(Data3DField field, RomsGrid.grid grid) throws Exception
 	{
 		Data3DField resflx=new Data3DField();
-		resflx.lat=res_lat;
-		resflx.lon=res_lon;
+		resflx.lat=grid.lat;
+		resflx.lon=grid.lon;
 		resflx.time=field.time;
 		resflx=Interpolation.BilinearInterpolation(field, resflx);
 		return resflx;
 	}
 	
-	public static void GribToNetCDFConvert(File fileIn, String outFile) throws IOException, Exception //, String dstFileName)
+	
+	
+	public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
 		try
 		{ 
-			GeoRectangle gr = new GeoRectangle((float)(43-4), (float)(63+4), (float)(129-4), (float)(160+4));
+			
+			RomsGrid grid = new RomsGrid(gridFile);
+			
+			GeoRectangle gr = grid.getRectangle();
 			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
 
 			Map<Integer, String> variables = getVariablesByNums(cdf);
 			
-			double lat[]=loadCoords(cdf, latName, gr.south_east.lat+4, gr.north_west.lat-4, true);
-			double lon[]=loadCoords(cdf, lonName, gr.north_west.lon+4, gr.south_east.lon-4);
-			double time[]=loadCoords(cdf, timeName);
-			double time1[]=loadCoords(cdf, time1Name);
+		//	double time[]=loadCoords(cdf, "lon_rho");
+//			double time1[]=loadCoords(cdf, "lon_rho");
 			
-			createNetCdfFile(outFile, lat, lon, time, variables);
-
-			for(int i =0; i < neededValues.length; ++i)
-			{	
-				String field = variables.get(neededValues[i]);
-				
-				if (field == null)
-				{
-					System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
-					continue;
-				}
-				
-				System.out.println(field);
-				Data3DField SST= getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
-				SST.InverseLatIfNecessary();
-				SST = InterpolateField(SST, lat, lon) ;
-				SST.InverseLatIfNecessary();
-
-				NetCDFOperator.writeFieldToNetCDF(outFile, field,  SST.data);
-			}
+//			"lon_rho"
+//			"lat_rho"
+//			"lon_psi"
+//			"lat_psi"
+//			"lon_u"
+//			"lat_u"
+//			"lon_v"
+//			"lat_v"
+			
+//			double lat[]=loadCoords(cdf, latName, gr.south_east.lat+4, gr.north_west.lat-4, true);
+//			double lon[]=loadCoords(cdf, lonName, gr.north_west.lon+4, gr.south_east.lon-4);
+			double time[]=loadCoords(cdf, timeName);
+//			double time1[]=loadCoords(cdf, time1Name);
+//			
+			createNetCdfFile(outFile, grid, time, variables);
+//			createNetCdfFile(outFile, lat, lon, time, variables);
+//
+//			for(int i =0; i < neededValues.length; ++i)
+//			{	
+//				String field = variables.get(neededValues[i]);
+//				
+//				if (field == null)
+//				{
+//					System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
+//					continue;
+//				}
+//				
+//				System.out.println(field);
+//				Data3DField SST= getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
+//				SST.InverseLatIfNecessary();
+//				SST = InterpolateField(SST, lat, lon) ;
+//				SST.InverseLatIfNecessary();
+//
+//				NetCDFOperator.writeFieldToNetCDF(outFile, field,  SST.data);
+//			}
 		}
 		finally
 		{
@@ -386,14 +511,14 @@ public class GribToNetCDFConvertor
 		}
 	}
 	
-	public static void createNetCdfFile(String dstFile, double latitude[], double longitude[],
+	public static void createNetCdfFile(String dstFile, RomsGrid grid,
+			// double latitude[], double longitude[],
 			double time[], Map<Integer, String> variables) 
 	{
 		NetcdfFileWriteable cdf=null;
-		int LONNUM = longitude.length;
-		int LATNUM = latitude.length;
-		int TIMENUM = time.length;
 		
+		int TIMENUM = time.length;
+
 		try
 		{
 			File outFile = new File(dstFile);
@@ -401,18 +526,20 @@ public class GribToNetCDFConvertor
 				outFile.delete();
 			
 			cdf = NetcdfFileWriteable.createNew(dstFile);
-			Dimension lonDim=cdf.addDimension(lonName, LONNUM),
-					latDim=cdf.addDimension(latName, LATNUM),
+			Dimension //lonDim=cdf.addDimension(lonName, LONNUM),
+					//latDim=cdf.addDimension(latName, LATNUM),
 					timeDim=cdf.addDimension(timeName, TIMENUM);
+			Map<String,Dimension> Dimensions = grid.createDimension(cdf);
 			
-			Dimension[] lodim=new Dimension[1];
+					
+			/*Dimension[] lodim=new Dimension[1];
 			lodim[0]=lonDim;
 			cdf.addVariable(lonName, DataType.DOUBLE, lodim);
 			
 			Dimension[] ladim=new Dimension[1];
 			ladim[0]=latDim;
 			cdf.addVariable(latName, DataType.DOUBLE, ladim);
-			
+			*/
 			Dimension[] tidim=new Dimension[1];
 			tidim[0]=timeDim;
 			cdf.addVariable(timeName, DataType.DOUBLE, tidim);
@@ -421,7 +548,7 @@ public class GribToNetCDFConvertor
 			Attribute att1 = new Attribute("missing_value", -9999);
 			
 			//TODO: заменить потом на итераторы
-			for (int i = 0; i < neededValues.length; ++i)
+		/*	for (int i = 0; i < neededValues.length; ++i)
 			{
 				Dimension[] todim=new Dimension[3];
 				todim[0] = timeDim;
@@ -438,12 +565,18 @@ public class GribToNetCDFConvertor
 				var.addAttribute(att);
 				var.addAttribute(att1);
 			}
-			
+			*/
 			cdf.create();
 			cdf.close();
 			
-			NetCDFOperator.writeTimeToNetCDF(dstFile, lonName, longitude);
-			NetCDFOperator.writeTimeToNetCDF(dstFile, latName, latitude);
+			
+			for(Iterator<String> i = Dimensions.keySet().iterator(); i.hasNext(); i.next())
+			{
+				NetCDFOperator.writeTimeToNetCDF(dstFile, i.toString(), grid.getParam(i.toString()));
+			}
+			
+			//NetCDFOperator.writeTimeToNetCDF(dstFile, lonName, longitude);
+			//NetCDFOperator.writeTimeToNetCDF(dstFile, latName, latitude);
 			NetCDFOperator.writeTimeToNetCDF(dstFile, timeName, time);
 		}
 		catch (Exception er)
@@ -459,13 +592,14 @@ public class GribToNetCDFConvertor
 	{
 		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
 		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
+		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
 		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-	   
+	  
 		File fIn = new File(fileIn);
 		//File fOut = new File(fileOut);
 		
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
-		GribToNetCDFConvert(fIn, fileOut);
+		GribToNetCDFConvert(fIn, fileGrid, fileOut);
 	}
 }
