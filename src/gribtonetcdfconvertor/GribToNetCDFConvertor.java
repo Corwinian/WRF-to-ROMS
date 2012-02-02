@@ -14,10 +14,12 @@ import LRFD.Db.NetCDFFile.*;
 import ucar.nc2.*;
 import ucar.ma2.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.HashMap;
+import sun.misc.Sort;
 
 
 /**
@@ -39,6 +41,13 @@ public class GribToNetCDFConvertor
 			{
 				lon = GribToNetCDFConvertor.loadCoords(cdf, lon_name = lonName);
 				lat = GribToNetCDFConvertor.loadCoords(cdf, lat_name = latName);
+				
+				Arrays.sort(lon);
+				Arrays.sort(lat);
+				
+				int n = 2000;
+				lon = Arrays.copyOf(lon, n);
+				lat = Arrays.copyOf(lat, n);
 			}
 			
 			public  Map<String, Dimension> createDimension(NetcdfFileWriteable cdf) throws IOException
@@ -469,14 +478,7 @@ public class GribToNetCDFConvertor
 		//	double time[]=loadCoords(cdf, "lon_rho");
 //			double time1[]=loadCoords(cdf, "lon_rho");
 			
-//			"lon_rho"
-//			"lat_rho"
-//			"lon_psi"
-//			"lat_psi"
-//			"lon_u"
-//			"lat_u"
-//			"lon_v"
-//			"lat_v"
+
 			
 //			double lat[]=loadCoords(cdf, latName, gr.south_east.lat+4, gr.north_west.lat-4, true);
 //			double lon[]=loadCoords(cdf, lonName, gr.north_west.lon+4, gr.south_east.lon-4);
@@ -484,6 +486,17 @@ public class GribToNetCDFConvertor
 //			double time1[]=loadCoords(cdf, time1Name);
 //			
 			createNetCdfFile(outFile, grid, time, variables);
+			
+			String field ="u_wind";
+			Data3DField SST= getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
+			SST.InverseLatIfNecessary();
+			SST = InterpolateField(SST, RomsGrid.u);
+			SST.InverseLatIfNecessary();
+
+			
+			
+			NetCDFOperator.writeFieldToNetCDF(outFile, field,  SST.data);
+			
 //			createNetCdfFile(outFile, lat, lon, time, variables);
 //
 //			for(int i =0; i < neededValues.length; ++i)
@@ -505,6 +518,10 @@ public class GribToNetCDFConvertor
 //				NetCDFOperator.writeFieldToNetCDF(outFile, field,  SST.data);
 //			}
 		}
+		catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
 		finally
 		{
 			cdf.close();
@@ -546,6 +563,22 @@ public class GribToNetCDFConvertor
 			
 			Attribute att = new Attribute("_FillValue", -9999);
 			Attribute att1 = new Attribute("missing_value", -9999);
+			
+			Dimension[] todim=new Dimension[3];
+				todim[0] = timeDim;
+				todim[1] = Dimensions.get("lat_u");
+				todim[2] = Dimensions.get("lon_u");
+				
+				String field = "u_wind";// variables.get(neededValues[i]);
+				
+				//if (field == null)
+				//	continue;
+				
+				Variable var = cdf.addVariable(field, DataType.DOUBLE, todim);
+				
+				var.addAttribute(att);
+				var.addAttribute(att1);
+			
 			
 			//TODO: заменить потом на итераторы
 		/*	for (int i = 0; i < neededValues.length; ++i)
