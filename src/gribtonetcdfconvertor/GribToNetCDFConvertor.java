@@ -316,16 +316,6 @@ public class GribToNetCDFConvertor
 		return resflx;
 	}
 	
-	public static Data3DField InterpolateField(Data3DField field, double[] lat, double[] lon) throws Exception
-	{
-		Data3DField resflx=new Data3DField();
-		resflx.lat=lat;
-		resflx.lon=lon;
-		resflx.time=field.time;
-		resflx=Interpolation.BilinearInterpolation(field, resflx);
-		return resflx;
-	}
-	
 	public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
