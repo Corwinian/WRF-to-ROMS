@@ -228,7 +228,35 @@ public class RomsTopLavel
 	
 	public RomsGrid.grid  getGridForVariable(int varNum)
 	{
-		return grid.u;
+		switch(varNum)
+		{
+			case 1:
+			case 7:
+			case 13:
+			case 51:
+			case 52:
+			case 33:
+			case 125:
+			case 122:
+			case 155:
+			case 121:
+			case 92:
+			case 91:
+			case 154:
+			case 81:
+			case 57:
+				return grid.u;
+			case 34:
+			case 124:
+					return grid.v;
+			case 11:
+			case 204:
+			case 207:
+			case 208:
+				return grid.rho;
+			default:
+				return null;
+		}
 	}
 	
 	public void writeField(int fieldNum, double[][][] data)
