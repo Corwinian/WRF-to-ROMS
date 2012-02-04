@@ -191,7 +191,7 @@ public class RomsTopLavel
 		resVals = new HashMap<Integer, RomsVariable>(24);
 		dstFile = dst_file;
 		
-		resVals.put(1, new RomsVariable("Temperature", "time", "u"));
+		resVals.put(1, new RomsVariable("Pressure", "time", "u"));
 		resVals.put(7, new RomsVariable("Geopotential_height", "time", "u"));
 		
 		resVals.put(13, new RomsVariable("Potential_temperature", "time", "u"));
