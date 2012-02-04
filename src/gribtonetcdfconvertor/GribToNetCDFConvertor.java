@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.HashMap;
+import javax.swing.plaf.synth.Region;
 import sun.misc.Sort;
 
 
@@ -316,6 +317,22 @@ public class GribToNetCDFConvertor
 		return resflx;
 	}
 	
+	private static Data3DField CalcShflux(Data3DField dswr, Data3DField dlwr, Data3DField uswr, Data3DField ulwr)
+	{
+		for (int i =0; i < dswr.data.length; ++i)
+		{
+			for (int c =0; c < dswr.data[i].length; ++c)
+			{
+				for (int j =0; j < dswr.data[i][c].length; ++j)
+				{
+					dswr.data[i][c][j] += dlwr.data[i][c][j] - uswr.data[i][c][j] - ulwr.data[i][c][j];
+				}
+			}
+		}
+		
+		return dswr;
+	}
+	
 	public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
@@ -345,13 +362,27 @@ public class GribToNetCDFConvertor
 				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
 				
 				SST.InverseLatIfNecessary();
-				SST = InterpolateField(SST, dest.getGridForVariable(i));
+				SST = InterpolateField(SST, dest.getGridForVariable(neededValues[i]));
 				SST.InverseLatIfNecessary();
 
 				dest.writeField(neededValues[i], SST.data);
 			}
 			
-			
+			//write shflux
+			{
+				System.out.println("shflux");
+
+				Data3DField shflux = CalcShflux(getFieldFromSRCFile(cdf, variables.get(204), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(205), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(211), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(212), gr, time[0], time[time.length -1]));
+
+				shflux.InverseLatIfNecessary();
+				shflux = InterpolateField(shflux, dest.getGridForVariable(207));
+
+
+				dest.writeField(207, shflux.data);
+			}
 		}
 		catch (Exception ex)
         {
