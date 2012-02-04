@@ -46,9 +46,9 @@ public class GribToNetCDFConvertor
 		33,//10 M u component wind
 		34,//10 M v component wind
 		204,//Incoming surface shortwave radiation — time-averaged
-		205,//Incoming surface longwave radiation - time-averaged
-		211,//Outgoing surface shortwave radiation - time-averaged			
-		212,//Outgoing surface longwave radiation – time-averaged
+//		205,//Incoming surface longwave radiation - time-averaged
+//		211,//Outgoing surface shortwave radiation - time-averaged			
+//		212,//Outgoing surface longwave radiation – time-averaged
 		124,//Surface u wind stress
 		125,//Surface v wind stress
 		122,//Surface sensible heat flux — time-averaged
@@ -326,7 +326,6 @@ public class GribToNetCDFConvertor
 		return resflx;
 	}
 	
-	
 	public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
@@ -334,59 +333,35 @@ public class GribToNetCDFConvertor
 		{ 
 			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile);
 			
-		//	RomsGrid grid = new RomsGrid(gridFile);
-			
 			GeoRectangle gr = dest.grid.getRectangle();
 			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
 
 			Map<Integer, String> variables = getVariablesByNums(cdf);
 			
-		//	double time[]=loadCoords(cdf, "lon_rho");
-//			double time1[]=loadCoords(cdf, "lon_rho");
-			
-
-			
-//			double lat[]=loadCoords(cdf, latName, gr.south_east.lat+4, gr.north_west.lat-4, true);
-//			double lon[]=loadCoords(cdf, lonName, gr.north_west.lon+4, gr.south_east.lon-4);
 			double time[]=loadCoords(cdf, timeName);
-//			double time1[]=loadCoords(cdf, time1Name);
-//			
-		//	createNetCdfFile(outFile, grid, time, variables);
-			
-			String field ="u_wind";
-			Data3DField SST= getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
-			SST.InverseLatIfNecessary();
-			SST = InterpolateField(SST, dest.grid.u);
-			//SST = InterpolateField(SST, SST.lat, SST.lon);
-			SST.InverseLatIfNecessary();
 
+			for(int i =0; i < neededValues.length; ++i)
+			{	
+				String field = variables.get(neededValues[i]);
+				
+				if (field == null)
+				{
+					System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
+					continue;
+				}
+				
+				System.out.println(field);
+				
+				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
+				
+				SST.InverseLatIfNecessary();
+				SST = InterpolateField(SST, dest.getGridForVariable(i));
+				SST.InverseLatIfNecessary();
+
+				dest.writeField(neededValues[i], SST.data);
+			}
 			
-			//createNetCdfFile(outFile, SST.lat, SST.lon,	time, variables);
-			//NetCDFOperator.writeFieldToNetCDF(outFile, "u_wind", SST.data);
-			dest.writeField(33, SST.data);
 			
-			
-			
-//			createNetCdfFile(outFile, lat, lon, time, variables);
-//
-//			for(int i =0; i < neededValues.length; ++i)
-//			{	
-//				String field = variables.get(neededValues[i]);
-//				
-//				if (field == null)
-//				{
-//					System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
-//					continue;
-//				}
-//				
-//				System.out.println(field);
-//				Data3DField SST= getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
-//				SST.InverseLatIfNecessary();
-//				SST = InterpolateField(SST, lat, lon) ;
-//				SST.InverseLatIfNecessary();
-//
-//				NetCDFOperator.writeFieldToNetCDF(outFile, field,  SST.data);
-//			}
 		}
 		catch (Exception ex)
         {
@@ -399,71 +374,7 @@ public class GribToNetCDFConvertor
 	}
 
 	
-	public static void createNetCdfFile(String dstFile, double latitude[], double longitude[],
-			double time[], Map<Integer, String> variables) 
-	{
-		NetcdfFileWriteable cdf=null;
-		int LONNUM = longitude.length;
-		int LATNUM = latitude.length;
-		int TIMENUM = time.length;
-		
-		try
-		{
-			File outFile = new File(dstFile);
-			if (outFile.exists()) 
-				outFile.delete();
-			
-			cdf = NetcdfFileWriteable.createNew(dstFile);
-			Dimension lonDim=cdf.addDimension(lonName, LONNUM),
-					latDim=cdf.addDimension(latName, LATNUM),
-					timeDim=cdf.addDimension(timeName, TIMENUM);
-			
-			Dimension[] lodim=new Dimension[1];
-			lodim[0]=lonDim;
-			cdf.addVariable(lonName, DataType.DOUBLE, lodim);
-			
-			Dimension[] ladim=new Dimension[1];
-			ladim[0]=latDim;
-			cdf.addVariable(latName, DataType.DOUBLE, ladim);
-			
-			Dimension[] tidim=new Dimension[1];
-			tidim[0]=timeDim;
-			cdf.addVariable(timeName, DataType.DOUBLE, tidim);
-			
-			Attribute att = new Attribute("_FillValue", -9999);
-			Attribute att1 = new Attribute("missing_value", -9999);
-			
-			//TODO: заменить потом на итераторы
-			for (int i = 0; i < neededValues.length; ++i)
-			{
-				Dimension[] todim=new Dimension[3];
-				todim[0] = timeDim;
-				todim[1] = latDim;
-				todim[2] = lonDim;
-				
-				String field = variables.get(neededValues[i]);
-				
-				if (field == null)
-					continue;
-				
-				Variable var = cdf.addVariable(field, DataType.DOUBLE, todim);
-				
-				var.addAttribute(att);
-				var.addAttribute(att1);
-			}
-			
-			cdf.create();
-			cdf.close();
-			
-			NetCDFOperator.writeTimeToNetCDF(dstFile, lonName, longitude);
-			NetCDFOperator.writeTimeToNetCDF(dstFile, latName, latitude);
-			NetCDFOperator.writeTimeToNetCDF(dstFile, timeName, time);
-		}
-		catch (Exception er)
-		{
-			er.printStackTrace();
-		}
-	}
+	
 	
    /**
 	* @param args the command line arguments
