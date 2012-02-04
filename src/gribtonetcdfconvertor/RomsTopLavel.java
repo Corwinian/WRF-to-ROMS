@@ -198,24 +198,22 @@ public class RomsTopLavel
 		resVals.put(51, new RomsVariable("Specific_humidity", "time", "u"));
 		resVals.put(52, new RomsVariable("Relative_humidity", "time", "u"));
 		
-		resVals.put(11, new RomsVariable("SST", "time", "u"));//Temperature surfase
+		resVals.put(11, new RomsVariable("SST", "time", "rho"));//Temperature surfase
 		
 		resVals.put(33, new RomsVariable("u_wind", "time", "u"));
-		resVals.put(34, new RomsVariable("v_wind", "time", "u"));
+		resVals.put(34, new RomsVariable("v_wind", "time", "v"));
 		
-		resVals.put(204, new RomsVariable("Downward_short_wave_flux", "time", "u"));
-//		resVals.put(205, new RomsVariable("Downward_long_wave_flux", "time", "u"));
-//		
-//		resVals.put(211, new RomsVariable("Upward_short_wave_flux", "time", "u"));
-//		resVals.put(212, new RomsVariable("Upward_long_wave_flux", "time", "u"));
+		resVals.put(207, new RomsVariable("shflux", "time", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
+		resVals.put(208, new RomsVariable("dQdSST", "time", "rho"));
 		
-		resVals.put(124, new RomsVariable("Zonal_momentum_flux", "time", "u"));
-		resVals.put(125, new RomsVariable("Meridional_momentum_flux", "time", "u"));
+		resVals.put(204, new RomsVariable("swrad", "time", "rho")); //Downward_short_wave_flux
+		
+		resVals.put(124, new RomsVariable("svstr", "time", "v"));//Zonal_momentum_flux
+		resVals.put(125, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
 		resVals.put(122, new RomsVariable("Sensible_heat_flux", "time", "u"));
 		
 		resVals.put(155, new RomsVariable("Ground_heat_flux", "time", "u"));
 		resVals.put(121, new RomsVariable("Latent_heat_flux", "time", "u"));
-		//resVals.put(172, new RomsVariable("Downward_long_wave_flux", "time", "u"));
 		
 		resVals.put(92, new RomsVariable("Ice_thickness", "time", "u"));
 		resVals.put(91, new RomsVariable("Ice_concentration_ice1no_ice0", "time", "u"));
