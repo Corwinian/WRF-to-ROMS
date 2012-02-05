@@ -73,6 +73,11 @@ public class GribToNetCDFConvertor
 		{ 
 			Attribute atr = variables.get(i).findAttribute("GRIB_param_number");
 			
+			if (i == 11 & variables.get(i).getName() == "Temperature")
+			{
+				map.put(12, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
+			}
+			
 			if (atr != null)
 				map.put((int)atr.getValue(0), variables.get(i).getName());
 		}
@@ -380,8 +385,31 @@ public class GribToNetCDFConvertor
 				shflux.InverseLatIfNecessary();
 				shflux = InterpolateField(shflux, dest.getGridForVariable(207));
 
-
 				dest.writeField(207, shflux.data);
+			}
+			
+			{
+				System.out.println("dQdSST");
+				CreateForcing forsing = new CreateForcing(fileIn.getAbsolutePath());
+				
+				//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
+				Data3DField dQdSST= forsing.getdQdSST(
+					getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
+					getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),						
+					getFieldFromSRCFile(cdf, variables.get(11), gr, time[0], time[time.length -1]),						
+					getFieldFromSRCFile(cdf, variables.get(33), gr, time[0], time[time.length -1]),
+					getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]),						 
+					//расчет поля плотности влажного воздуха
+					forsing.getAirDensity(
+						getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
+						getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),
+						getFieldFromSRCFile(cdf, variables.get(1), gr, time[0], time[time.length -1]))
+					);
+				
+				dQdSST.InverseLatIfNecessary();
+				dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(208));
+
+				dest.writeField(208, dQdSST.data);
 			}
 		}
 		catch (Exception ex)
