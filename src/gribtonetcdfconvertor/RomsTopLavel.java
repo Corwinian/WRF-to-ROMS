@@ -212,6 +212,9 @@ public class RomsTopLavel
 		resVals.put(125, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
 		resVals.put(122, new RomsVariable("Sensible_heat_flux", "time", "u"));
 		
+		resVals.put(127, new RomsVariable("svstr10", "time", "v"));
+		resVals.put(128, new RomsVariable("sustr10", "time", "u"));
+		
 		resVals.put(155, new RomsVariable("Ground_heat_flux", "time", "u"));
 		resVals.put(121, new RomsVariable("Latent_heat_flux", "time", "u"));
 		
