@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.HashMap;
 import javax.swing.plaf.synth.Region;
 import sun.misc.Sort;
+import java.lang.Math;
+
+import java.math.MathContext;
 
 
 /**
@@ -320,6 +323,160 @@ public class GribToNetCDFConvertor
 		resflx.time=field.time;
 		resflx=Interpolation.BilinearInterpolation(field, resflx);
 		return resflx;
+	}
+	
+	
+	private static 	ArrayList<Integer> findGood(double[] u, double[] v)
+	{
+		ArrayList<Integer> res = new ArrayList<Integer>();
+		for (int i=0; i < u.length; ++i)
+		{
+			if((Math.abs(u[i]) + v[i]) ==0)
+				res.add(res.size());
+		}
+		
+		return res;
+	}
+	
+	private static ArrayList<Integer> findZeros(double[] u, double[] v)
+	{
+		ArrayList<Integer> res = new ArrayList<Integer>();
+		for (int i=0; i < u.length; ++i)
+		{
+			if((Math.abs(u[i]) + v[i]) > 0)
+				res.add(res.size());
+		}
+		
+		return res;
+	}
+	
+	public static double []createTemp(ArrayList<Integer> needs, double[] all)
+	{
+		double [] res = new double[needs.size()];
+		
+		for(int i =0; i < needs.size(); i++ )
+		{
+			res[i] = all[needs.get(i)];
+		}
+		return res;
+	}
+	
+	
+	private static boolean mayCalc(Complex [] c, Complex [] d1)
+	{
+		Complex max = new Complex();
+		for (int i=0; i < d1.length; i++)
+		{
+			Complex tem = Complex.abs(c[i].minus(d1[i]));
+			if (tem.getRe() > max.getRe())
+				max = tem;
+		}
+		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
+		return max.getRe() > 0.01;
+	}
+	
+	public static ArrayList<Integer>find_c(Complex []c)
+	{
+		ArrayList<Integer> res = new ArrayList<>();
+		for (int i=0; i < c.length; i++)
+		{
+			if(c[i].getRe() > 11)
+				res.add(res.size());
+		}
+		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
+		return  res;
+	}
+	
+	private static double[][] getWstress(double []u, double[] v)
+	{
+		double z0 = 10, k=0.41, rho=1.25e-3, a1=1/k*Math.log(z0/10.);
+		
+		double []u10 = new double[u.length], v10= new double[u.length], 
+				taux= new double[u.length], tauy = new double[u.length];
+		
+		ArrayList<Integer> izeros = findZeros(u, v);
+		ArrayList<Integer> igood = findGood(u, v);
+		
+		u = createTemp(igood, u);
+		v = createTemp(igood, v);
+		
+		Complex[] w = new Complex[v.length];
+		Complex[] v0 = new Complex[v.length];
+		
+		for (int i =0; i < w.length; ++i)
+		{
+			w[i]= new Complex(u[i], v[i]);
+			v0[i] = w[i].abs();
+		}
+		
+		Complex[] c = new Complex[u.length], d1=new Complex[u.length], cd = new Complex[u.length];
+		
+		for (int i=0; i < d1.length; d1[i++].setRe(1.0e+35));
+		
+		while(mayCalc(c, d1))
+		{
+			c = d1.clone();
+			
+			for (int i=0; i < cd.length; cd[i++].setRe(1.205e-3));
+			
+			ArrayList<Integer> ind =find_c(c);
+			
+			if (!ind.isEmpty())
+			{
+				for(Iterator<Integer> i = ind.iterator(); i.hasNext();)
+				{
+					Integer t = i.next();
+					cd[t] = Complex.asterisk(Complex.plus(0.49, Complex.asterisk(0.065, c[t])), 1.e-3);
+				}
+			}
+			//d1=v0./(1+a1.*sqrt(cd));
+			
+			for (int i =0; i < d1.length; ++i)
+			{
+				d1[i] = Complex.slash(v0[i], Complex.plus(1, Complex.asterisk(a1, cd[i].sqrt())));
+			}
+		}
+		
+		Complex[] t = new Complex[u.length];
+		
+		for (int i=0; i < t.length; i++)
+		{
+			t[i] = Complex.asterisk(rho, cd[i].asterisk(Complex.asterisk(1.e+4, d1[i])));
+		}
+		
+		Complex[] w10 = new Complex[u.length];
+		for (int i=0; i < w10.length; i++)
+		{
+			w10[i] = Complex.asterisk(d1[i].slash(v0[i]), w[i]);
+		}
+		
+		for (int i=0; i < igood.size(); i++)
+		{
+			u10[igood.get(i)] = w10[i].getRe();
+			v10[igood.get(i)] = w10[i].getim();
+		}
+		
+		for (int i=0; i < izeros.size(); i++)
+		{
+			v10[izeros.get(i)] = u10[izeros.get(i)] = 0;
+		}
+		
+		return new double[][]{u10, v10};
+	}
+	
+	public static Data3DField [] CalcWstress(Data3DField u, Data3DField v)
+	{
+		for (int i=0; i < u.data.length; ++i)
+		{
+			for (int c=0; c < u.data[0].length; ++c)
+			{
+				double [][] t = getWstress(u.data[i][c], v.data[i][c]);
+				u.data[i][c] = t[0].clone();
+				v.data[i][c] = t[1].clone();
+			}
+		}
+		
+		return new Data3DField[]{u, v};
 	}
 	
 	private static Data3DField CalcShflux(Data3DField dswr, Data3DField dlwr, Data3DField uswr, Data3DField ulwr)
