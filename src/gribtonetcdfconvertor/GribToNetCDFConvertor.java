@@ -411,13 +411,17 @@ public class GribToNetCDFConvertor
 		
 		Complex[] c = new Complex[u.length], d1=new Complex[u.length], cd = new Complex[u.length];
 		
-		for (int i=0; i < d1.length; d1[i++].setRe(1.0e+35));
+		for (int i=0; i < d1.length;i++)
+		{
+			d1[i] = new Complex(1.0e+35);
+			c[i] = new Complex(0);
+		}
 		
 		while(mayCalc(c, d1))
 		{
 			c = d1.clone();
 			
-			for (int i=0; i < cd.length; cd[i++].setRe(1.205e-3));
+			for (int i=0; i < cd.length; cd[i++] = new Complex(1.205e-3));
 			
 			ArrayList<Integer> ind =find_c(c);
 			
