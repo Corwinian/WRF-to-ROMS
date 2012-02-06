@@ -248,10 +248,12 @@ public class RomsTopLavel
 			case 154:
 			case 81:
 			case 57:
+			case 128:
 				return grid.u;
 			case 34:
 			case 124:
-					return grid.v;
+			case 127:
+				return grid.v;
 			case 11:
 			case 204:
 			case 207:
