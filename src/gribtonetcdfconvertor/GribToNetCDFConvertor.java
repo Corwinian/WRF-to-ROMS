@@ -326,24 +326,24 @@ public class GribToNetCDFConvertor
 	}
 	
 	
-	private static 	ArrayList<Integer> findGood(double[] u, double[] v)
+	private static ArrayList<Integer> findZeros(double[] u, double[] v)
 	{
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i]) + v[i]) ==0)
+			if((Math.abs(u[i] + v[i])) ==0)
 				res.add(res.size());
 		}
 		
 		return res;
 	}
 	
-	private static ArrayList<Integer> findZeros(double[] u, double[] v)
+	private static 	ArrayList<Integer> findGood(double[] u, double[] v)
 	{
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i]) + v[i]) > 0)
+			if((Math.abs(u[i] + v[i])) > 0)
 				res.add(res.size());
 		}
 		
@@ -545,29 +545,29 @@ public class GribToNetCDFConvertor
 				dest.writeField(207, shflux.data);
 			}
 			
-			{
-				System.out.println("dQdSST");
-				CreateForcing forsing = new CreateForcing(fileIn.getAbsolutePath());
-				
-				//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
-				Data3DField dQdSST= forsing.getdQdSST(
-					getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
-					getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),						
-					getFieldFromSRCFile(cdf, variables.get(11), gr, time[0], time[time.length -1]),						
-					getFieldFromSRCFile(cdf, variables.get(33), gr, time[0], time[time.length -1]),
-					getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]),						 
-					//расчет поля плотности влажного воздуха
-					forsing.getAirDensity(
-						getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(1), gr, time[0], time[time.length -1]))
-					);
-				
-				dQdSST.InverseLatIfNecessary();
-				dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(208));
-
-				dest.writeField(208, dQdSST.data);
-			}
+//			{
+//				System.out.println("dQdSST");
+//				CreateForcing forsing = new CreateForcing(fileIn.getAbsolutePath());
+//				
+//				//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
+//				Data3DField dQdSST= forsing.getdQdSST(
+//					getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
+//					getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),						
+//					getFieldFromSRCFile(cdf, variables.get(11), gr, time[0], time[time.length -1]),						
+//					getFieldFromSRCFile(cdf, variables.get(33), gr, time[0], time[time.length -1]),
+//					getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]),						 
+//					//расчет поля плотности влажного воздуха
+//					forsing.getAirDensity(
+//						getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
+//						getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),
+//						getFieldFromSRCFile(cdf, variables.get(1), gr, time[0], time[time.length -1]))
+//					);
+//				
+//				dQdSST.InverseLatIfNecessary();
+//				dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(208));
+//
+//				dest.writeField(208, dQdSST.data);
+//			}
 			{
 				
 				System.out.println("windStress");
