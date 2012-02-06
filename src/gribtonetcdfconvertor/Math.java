@@ -90,7 +90,7 @@ class Complex
 	public static Complex minus(double a, Complex b){ return minus (new Complex(a), b);}
 	public static Complex minus(Complex a, double b){ return minus (a, new Complex(b));}	
 	public static Complex minus(Complex a, Complex b)
-	{return  new Complex(a.re - a.re, a.im - b.im);}
+	{return  new Complex(a.re - b.re, a.im - b.im);}
 	
 	public Complex asterisk(double z) {return asterisk(new Complex(z));}
 	public Complex asterisk(Complex z){return asterisk(this, new Complex(z));} 
