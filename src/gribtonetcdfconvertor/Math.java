@@ -4,6 +4,7 @@
  */
 package gribtonetcdfconvertor;
 
+import java.lang.Math;
 /**
  *
  * @author corwin
@@ -37,6 +38,11 @@ class Complex
 	public double mod(){return Math.sqrt(re * re + im * im);}  
 	public double arg(){return Math.atan2(re, im);}
 
+	public Complex sqrt() 
+	{
+		return new	Complex(Math.sqrt(mod()) * Math.cos(arg()), Math.sqrt(mod()) * Math.sin(arg()));
+	}
+		
 	public boolean isReal(){return Math.abs(im) < EPS;} 
 
 	// Вывод на экран 
@@ -69,17 +75,44 @@ class Complex
 
 	// Методы, реализующие операции +, -, *, /  
 
-	public Complex plus(Complex z){ return new Complex(re + z.re, im + z.im);}
-	public Complex minus(Complex z) {return new Complex(re - z.re, im - z.im); }
+	public static Complex abs(Complex z){ return new Complex(Math.abs(z.re), Math.abs(z.im));}
+	public Complex abs(){ return Complex.abs(this);}
 	
-	public Complex asterisk(Complex z)
-	{	
-		return new Complex( re * z.re - im * z.im, re * z.im + im * z.re);
-	} 
+	public Complex plus(double z){ return plus(this, new Complex(z));}
+	public Complex plus(Complex z){ return Complex.plus(this, z);}
+	public static Complex plus(double a, Complex b){ return plus (new Complex(a), b);}
+	public static Complex plus(Complex a, double b){ return plus (a, new Complex(b));}	
+	public static Complex plus(Complex a, Complex b)
+	{ return new Complex(a.re + b.re, a.im + b.im);}
 	
-	public Complex slash(Complex z)
-	{  
-		double m = z.mod();  
-		return new Complex((re * z.re - im * z.im) / m, (im * z.re - re * z.im) / m); 
-	} 
+	public Complex minus(double z){ return minus(this, new Complex(z));}
+	public Complex minus(Complex z){ return Complex.minus(this, z);}
+	public static Complex minus(double a, Complex b){ return minus (new Complex(a), b);}
+	public static Complex minus(Complex a, double b){ return minus (a, new Complex(b));}	
+	public static Complex minus(Complex a, Complex b)
+	{return  new Complex(a.re - a.re, a.im - b.im);}
+	
+	public Complex asterisk(double z) {return asterisk(new Complex(z));}
+	public Complex asterisk(Complex z){return asterisk(this, new Complex(z));} 
+	public static Complex asterisk(double a, Complex b){ return asterisk (new Complex(a), b);}
+	public static Complex asterisk(Complex a, double b){ return asterisk (a, new Complex(b));}	
+	public static Complex asterisk(Complex a, Complex b)
+	{
+		return new Complex( a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+	}
+	
+	public Complex slash(double z){ return slash(this, new Complex(z));}
+	public Complex slash(Complex z){ return Complex.slash(this, z);}
+	public static Complex slash(double a, Complex b){ return slash (new Complex(a), b);}
+	public static Complex slash(Complex a, double b){ return slash (a, new Complex(b));}	
+	public static Complex slash(Complex a, Complex b)
+	{ 
+		double m = b.mod();  
+		return new Complex((a.re * b.re - a.im * b.im) / m, (a.im * b.re - a.re * b.im) / m); 
+	}
+};
+
+class Vectorr
+{
+	
 };
