@@ -202,8 +202,8 @@ public class GribToNetCDFConvertor
 		if (!(var.getRank()==3 || (var.getRank()==4 && var.getDimension(1).getLength()==1))) 
 			throw new Exception("Error in Dimensions, Rank of dimensions for variable "+var.getName()+" must be 3.");
 		
-		String lvName = (FieldName.equals("Specific_humidity") || FieldName.equals("Relative_humidity")) ?
-				level1Name : levelName ;
+		String lvName = (FieldName.equals("Specific_humidity") || FieldName.equals("Relative_humidity") ||
+				FieldName.equals("Temperature")) ? level1Name : levelName ;
 		String tmName = (FieldName.equals("Evaporation") || FieldName.equals("Land_Surface_Precipitation_Accumulation_LSPA")) ?
 				time1Name : timeName;
 		
