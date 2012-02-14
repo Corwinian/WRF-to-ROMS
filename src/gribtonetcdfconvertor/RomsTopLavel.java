@@ -196,9 +196,17 @@ public class RomsTopLavel
 		private Integer typeValue;
 		private VariablesNums(Integer type) {typeValue = type;}
 		public Integer getTypeValue() {return typeValue;}
+		
+		static public VariablesNums  getType(Integer pType) 
+		{
+			for (VariablesNums  type: VariablesNums .values()) 
+			{
+				if (type.getTypeValue().equals(pType)) 
+					return type;
+			}
+			throw new RuntimeException("unknown type");
+		}
 	}
-	
-	
 	
 	static NetcdfFileWriteable cdf;
 	static String dstFile;
