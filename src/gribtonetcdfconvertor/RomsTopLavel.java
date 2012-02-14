@@ -140,27 +140,15 @@ public class RomsTopLavel
 		
 		public double[] getParam(String name)
 		{
-			switch(name)
-			{
-				case "lon_rho":
-					return rho.getLon();
-				case "lat_rho":
-					return rho.getLat();
-				case "lon_psi":
-					return psi.getLon();
-				case "lat_psi":
-					return psi.getLat();
-				case "lon_u":
-					return u.getLon();
-				case "lat_u":
-					return u.getLat();
-				case "lon_v":
-					return v.getLon();
-				case "lat_v":
-					return v.getLat();
-				default:
-					return null;
-			}
+			if (name.equals("lon_rho")) {return rho.getLon();}
+			if (name.equals("lat_rho")) {return rho.getLat();}
+			if (name.equals("lon_psi")) {return psi.getLon();}
+			if (name.equals("lat_psi")) {return psi.getLat();}
+			if (name.equals("lon_u")) {return u.getLon();}
+			if (name.equals("lat_u")) {return u.getLat();}
+			if (name.equals("lon_v")) {return v.getLon();}
+			if (name.equals("lat_v")) {return v.getLat();}
+			return null;
 		}
 	};
 	
@@ -225,7 +213,6 @@ public class RomsTopLavel
 		resVals.put(81, new RomsVariable("Land_cover_land1sea0", "time", "u"));
 		resVals.put(57, new RomsVariable("Evaporation", "time", "u"));
 		
-		
 		createFile();
 }
 	
@@ -273,11 +260,15 @@ public class RomsTopLavel
 	{
 		try
 		{
-			double [] time = {3.0};
+			double[] time = {3.0};
 			cdf = NetcdfFileWriteable.createNew(dstFile);
 			
 			Dimension timeDim = cdf.addDimension("time", time.length);
 			Map<String,Dimension> Dimensions = grid.createDimension(cdf);
+
+			Dimension[] timeDimArr=new Dimension[1];
+			timeDimArr[0]=timeDim;
+			cdf.addVariable("time", DataType.DOUBLE, timeDimArr);
 			
 			Attribute att = new Attribute("missing_value", -9999);
 			
@@ -302,9 +293,10 @@ public class RomsTopLavel
 			cdf.create();
 			cdf.close();
 			
-			for(Iterator<String> i = Dimensions.keySet().iterator(); i.hasNext(); i.next())
+			for(Iterator<String> i = Dimensions.keySet().iterator(); i.hasNext();)
 			{
-				NetCDFOperator.writeTimeToNetCDF(dstFile, i.toString(), grid.getParam(i.toString()));
+				String buf= i.next();
+				NetCDFOperator.writeTimeToNetCDF(dstFile, buf, grid.getParam(buf));
 			}
 			
 			NetCDFOperator.writeTimeToNetCDF(dstFile, "time", time);

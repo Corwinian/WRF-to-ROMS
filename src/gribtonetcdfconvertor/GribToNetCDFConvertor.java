@@ -78,10 +78,11 @@ public class GribToNetCDFConvertor
 			
 			if (atr != null)
 			{
-				if ((int)atr.getValue(0) == 11 & variables.get(i).getName().equals("Temperature"))
+				if ((Integer)atr.getValue(0) == 11 &&
+					variables.get(i).getName().equals("Temperature"))
 					map.put(12, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
 				else			
-					map.put((int)atr.getValue(0), variables.get(i).getName());
+					map.put((Integer)atr.getValue(0), variables.get(i).getName());
 			}
 		}
 		
@@ -377,7 +378,7 @@ public class GribToNetCDFConvertor
 	
 	public static ArrayList<Integer>find_c(Complex []c)
 	{
-		ArrayList<Integer> res = new ArrayList<>();
+		ArrayList<Integer> res = new ArrayList();
 		for (int i=0; i < c.length; i++)
 		{
 			if(c[i].getRe() > 11)
@@ -590,9 +591,9 @@ public class GribToNetCDFConvertor
 			}
 		}
 		catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
+		{
+			ex.printStackTrace();
+		}
 		finally
 		{
 			cdf.close();
@@ -608,10 +609,10 @@ public class GribToNetCDFConvertor
 	public static void main(String[] args) throws IOException, Exception
 	{
 		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
-		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
+		String fileIn ="/media/C2BE-74F3/Курсовик/project/wrf/wrfprs_for_roms.003.grb";
 	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
-		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
+		String fileGrid = "/media/C2BE-74F3/Курсовик/wrf/roms_grd.nc";
+		String fileOut = "./wrfprs_for_roms.003.nc";
 	  
 		File fIn = new File(fileIn);
 		//File fOut = new File(fileOut);
