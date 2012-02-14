@@ -19,8 +19,6 @@ import ucar.nc2.*;
  */
 public class RomsTopLavel 
 {
-	
-	
 	public class RomsGrid
 	{
 		NetcdfFile existGrid;
@@ -33,6 +31,8 @@ public class RomsTopLavel
 				lat_u = "lat_u",
 				lon_v = "lon_v",
 				lat_v = "lat_v";
+		
+		
 		
 		public class grid
 		{
@@ -166,52 +166,86 @@ public class RomsTopLavel
 		}
 	};
 	
+	
+	public enum VariablesNums 
+	{
+		Pressure(1),
+		Geopotential_height(7),
+		Potential_temperature(13),
+		Specific_humidity(51),
+		Relative_humidity(52),
+		SST(11),
+		u_wind(33),
+		v_wind(34),
+		shflux(207),
+		dQdSST(208),
+		swrad(204),
+		svstr(124),
+		sustr(125),
+		Sensible_heat_flux(122),
+		svstr10(127),
+		sustr10(81),
+		Ground_heat_flux(155),
+		Latent_heat_flux(121),
+		Ice_thickness(92),
+		Ice_concentration_ice1no_ice0(91),
+		Land_Surface_Precipitation_Accumulation_LSPA(154),
+		Land_cover_land1sea0(81),
+		Evaporation(57);	
+
+		private Integer typeValue;
+		private VariablesNums(Integer type) {typeValue = type;}
+		public Integer getTypeValue() {return typeValue;}
+	}
+	
+	
+	
 	static NetcdfFileWriteable cdf;
 	static String dstFile;
 	
 	RomsGrid grid;
 	
-	Map<Integer, RomsVariable> resVals;
+	Map<VariablesNums, RomsVariable> resVals;
 	
 	public RomsTopLavel(String dst_file, String gridFile) throws IOException
 	{
 		grid = new RomsGrid(gridFile);
-		resVals = new HashMap<Integer, RomsVariable>(24);
+		resVals = new HashMap<>(24);
 		dstFile = dst_file;
 		
-		resVals.put(1, new RomsVariable("Pressure", "time", "u"));
-		resVals.put(7, new RomsVariable("Geopotential_height", "time", "u"));
+		resVals.put(VariablesNums.Pressure, new RomsVariable("Pressure", "time", "u"));
+		resVals.put(VariablesNums.Geopotential_height, new RomsVariable("Geopotential_height", "time", "u"));
 		
-		resVals.put(13, new RomsVariable("Potential_temperature", "time", "u"));
-		resVals.put(51, new RomsVariable("Specific_humidity", "time", "u"));
-		resVals.put(52, new RomsVariable("Relative_humidity", "time", "u"));
+		resVals.put(VariablesNums.Potential_temperature, new RomsVariable("Potential_temperature", "time", "u"));
+		resVals.put(VariablesNums.Specific_humidity, new RomsVariable("Specific_humidity", "time", "u"));
+		resVals.put(VariablesNums.Relative_humidity, new RomsVariable("Relative_humidity", "time", "u"));
 		
-		resVals.put(11, new RomsVariable("SST", "time", "rho"));//Temperature surfase
+		resVals.put(VariablesNums.SST, new RomsVariable("SST", "time", "rho"));//Temperature surfase
 		
-		resVals.put(33, new RomsVariable("u_wind", "time", "u"));
-		resVals.put(34, new RomsVariable("v_wind", "time", "v"));
+		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "time", "u"));
+		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "time", "v"));
 		
-		resVals.put(207, new RomsVariable("shflux", "time", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
-		resVals.put(208, new RomsVariable("dQdSST", "time", "rho"));
+		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "time", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
+		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "time", "rho"));
 		
-		resVals.put(204, new RomsVariable("swrad", "time", "rho")); //Downward_short_wave_flux
+		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "time", "rho")); //Downward_short_wave_flux
 		
-		resVals.put(124, new RomsVariable("svstr", "time", "v"));//Zonal_momentum_flux
-		resVals.put(125, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
-		resVals.put(122, new RomsVariable("Sensible_heat_flux", "time", "u"));
+		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "time", "v"));//Zonal_momentum_flux
+		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
+		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "time", "u"));
 		
-		resVals.put(127, new RomsVariable("svstr10", "time", "v"));
-		resVals.put(128, new RomsVariable("sustr10", "time", "u"));
+		resVals.put(VariablesNums.svstr10, new RomsVariable("svstr10", "time", "v"));
+		resVals.put(VariablesNums.sustr10, new RomsVariable("sustr10", "time", "u"));
 		
-		resVals.put(155, new RomsVariable("Ground_heat_flux", "time", "u"));
-		resVals.put(121, new RomsVariable("Latent_heat_flux", "time", "u"));
+		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "time", "u"));
+		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "time", "u"));
 		
-		resVals.put(92, new RomsVariable("Ice_thickness", "time", "u"));
-		resVals.put(91, new RomsVariable("Ice_concentration_ice1no_ice0", "time", "u"));
+		resVals.put(VariablesNums.Ice_thickness, new RomsVariable("Ice_thickness", "time", "u"));
+		resVals.put(VariablesNums.Ice_concentration_ice1no_ice0, new RomsVariable("Ice_concentration_ice1no_ice0", "time", "u"));
 		
-		resVals.put(154, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "time", "u"));
-		resVals.put(81, new RomsVariable("Land_cover_land1sea0", "time", "u"));
-		resVals.put(57, new RomsVariable("Evaporation", "time", "u"));
+		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "time", "u"));
+		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "time", "u"));
+		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "time", "u"));
 		createFile();
 }
 	
@@ -271,9 +305,9 @@ public class RomsTopLavel
 			
 			Attribute att = new Attribute("missing_value", -9999);
 			
-			for(Iterator<Integer> i = resVals.keySet().iterator(); i.hasNext();)
+			for(Iterator<VariablesNums> i = resVals.keySet().iterator(); i.hasNext();)
 			{
-				int num = i.next();
+				VariablesNums num = i.next();
 				RomsVariable var = resVals.get(num);
 				Dimension[] todim = new Dimension[3];
 				
@@ -283,7 +317,7 @@ public class RomsTopLavel
 				
 				Variable varr = cdf.addVariable(var.name, DataType.DOUBLE, todim);
 				
-				varr.addAttribute(new Attribute("GRIB_param_number", num));
+				varr.addAttribute(new Attribute("GRIB_param_number", num.typeValue));
 				varr.addAttribute(new Attribute("GRIB_param_name", var.name));
 				
 				varr.addAttribute(att);
