@@ -25,14 +25,14 @@ public class RomsTopLavel
 	{
 		NetcdfFile existGrid;
 		
-		private String lon_rho_name =  "lon_rho",
-				lat_rho_name = "lat_rho",
-				lon_psi_name = "lon_psi",
-				lat_psi_name = "lat_psi",
-				lon_u_name = "lon_u",
-				lat_u_name = "lat_u",
-				lon_v_name = "lon_v",
-				lat_v_name = "lat_v";
+		private String lon_rho =  "lon_rho",
+				lat_rho = "lat_rho",
+				lon_psi = "lon_psi",
+				lat_psi = "lat_psi",
+				lon_u = "lon_u",
+				lat_u = "lat_u",
+				lon_v = "lon_v",
+				lat_v = "lat_v";
 		
 		public class grid
 		{
@@ -112,10 +112,10 @@ public class RomsTopLavel
 		{
 			existGrid = NetcdfFile.open(road);
 			
-			rho = new RomsGrid.grid( "lon_rho", "lat_rho" );
-			psi = new RomsGrid.grid("lon_psi", "lat_psi" );
-			u = new RomsGrid.grid("lon_u", "lat_u" );
-			v = new RomsGrid.grid("lon_v", "lat_v" );
+			rho = new RomsGrid.grid( lon_rho, lat_rho);
+			psi = new RomsGrid.grid(lon_psi, lat_psi);
+			u = new RomsGrid.grid(lon_u, lat_u);
+			v = new RomsGrid.grid(lon_v, lat_v);
 		}
 		
 		public GeoRectangle getRectangle() throws Exception
@@ -140,14 +140,14 @@ public class RomsTopLavel
 		
 		public double[] getParam(String name)
 		{
-			if (name.equals("lon_rho")) {return rho.getLon();}
-			if (name.equals("lat_rho")) {return rho.getLat();}
-			if (name.equals("lon_psi")) {return psi.getLon();}
-			if (name.equals("lat_psi")) {return psi.getLat();}
-			if (name.equals("lon_u")) {return u.getLon();}
-			if (name.equals("lat_u")) {return u.getLat();}
-			if (name.equals("lon_v")) {return v.getLon();}
-			if (name.equals("lat_v")) {return v.getLat();}
+			if (name.equals(lon_rho)) {return rho.getLon();}
+			if (name.equals(lat_rho)) {return rho.getLat();}
+			if (name.equals(lon_psi)) {return psi.getLon();}
+			if (name.equals(lat_psi)) {return psi.getLat();}
+			if (name.equals(lon_u)) {return u.getLon();}
+			if (name.equals(lat_u)) {return u.getLat();}
+			if (name.equals(lon_v)) {return v.getLon();}
+			if (name.equals(lat_v)) {return v.getLat();}
 			return null;
 		}
 	};
@@ -212,7 +212,6 @@ public class RomsTopLavel
 		resVals.put(154, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "time", "u"));
 		resVals.put(81, new RomsVariable("Land_cover_land1sea0", "time", "u"));
 		resVals.put(57, new RomsVariable("Evaporation", "time", "u"));
-		
 		createFile();
 }
 	
