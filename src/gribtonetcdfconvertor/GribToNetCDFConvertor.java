@@ -505,15 +505,15 @@ public class GribToNetCDFConvertor
 		NetcdfFile cdf = null;
 		try
 		{ 
-			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile);
+			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
+			double time[]=loadCoords(cdf, timeName);
+			
+			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile, time);
 			
 			GeoRectangle gr = dest.grid.getRectangle();
-			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
-
+			
 			Map<Integer, String> variables = getVariablesByNums(cdf);
 			
-			double time[]=loadCoords(cdf, timeName);
-
 			for(int i =0; i < neededValues.length; ++i)
 			{	
 				String field = variables.get(neededValues[i]);

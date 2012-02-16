@@ -215,7 +215,7 @@ public class RomsTopLavel
 	
 	Map<VariablesNums, RomsVariable> resVals;
 	
-	public RomsTopLavel(String dst_file, String gridFile) throws IOException
+	public RomsTopLavel(String dst_file, String gridFile, double  []time) throws IOException
 	{
 		grid = new RomsGrid(gridFile);
 		resVals = new HashMap<>(24);
@@ -254,7 +254,7 @@ public class RomsTopLavel
 		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "time", "u"));
 		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "time", "u"));
 		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "time", "u"));
-		createFile();
+		createFile(time);
 }
 	
 	public RomsGrid.grid  getGridForVariable(int varNum)
@@ -297,11 +297,10 @@ public class RomsTopLavel
 		NetCDFOperator.writeFieldToNetCDF(dstFile, resVals.get(VariablesNums.getType(fieldNum)).name, data);
 	}
 	
-	public void createFile() throws IOException
+	public void createFile(double []time) throws IOException
 	{
 		try
 		{
-			double[] time = {3.0};
 			cdf = NetcdfFileWriteable.createNew(dstFile);
 			
 			Dimension timeDim = cdf.addDimension("time", time.length);
