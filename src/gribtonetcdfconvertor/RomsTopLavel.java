@@ -184,7 +184,7 @@ public class RomsTopLavel
 		sustr(125),
 		Sensible_heat_flux(122),
 		svstr10(127),
-		sustr10(81),
+		sustr10(128),
 		Ground_heat_flux(155),
 		Latent_heat_flux(121),
 		Ice_thickness(92),
@@ -199,7 +199,7 @@ public class RomsTopLavel
 		
 		static public VariablesNums  getType(Integer pType) 
 		{
-			for (VariablesNums  type: VariablesNums .values()) 
+			for (VariablesNums  type: VariablesNums.values()) 
 			{
 				if (type.getTypeValue().equals(pType)) 
 					return type;
@@ -292,9 +292,9 @@ public class RomsTopLavel
 		}
 	}
 	
-	public void writeField(int fieldNum, double[][][] data)
+	public void writeField(Integer fieldNum, double[][][] data)
 	{
-		NetCDFOperator.writeFieldToNetCDF(dstFile, resVals.get(fieldNum).name, data);
+		NetCDFOperator.writeFieldToNetCDF(dstFile, resVals.get(VariablesNums.getType(fieldNum)).name, data);
 	}
 	
 	public void createFile() throws IOException

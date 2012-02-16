@@ -609,10 +609,10 @@ public class GribToNetCDFConvertor
 	public static void main(String[] args) throws IOException, Exception
 	{
 		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
-		String fileIn ="/media/C2BE-74F3/Курсовик/project/wrf/wrfprs_for_roms.003.grb";
+		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
 	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-		String fileGrid = "/media/C2BE-74F3/Курсовик/wrf/roms_grd.nc";
-		String fileOut = "./wrfprs_for_roms.003.nc";
+		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
+		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
 	  
 		File fIn = new File(fileIn);
 		//File fOut = new File(fileOut);
