@@ -70,7 +70,7 @@ public class GribToNetCDFConvertor
 	{
 		List<Variable> variables = cdf.getVariables();
 		
-		Map<Integer, String> map = new HashMap<Integer, String>();
+		Map<Integer, String> map = new HashMap<>();
 		/*я не нашел как сделать через итераторы, поэтому сделал так*/
 		for(int i = 0; i < variables.size(); ++i)
 		{ 
@@ -608,15 +608,29 @@ public class GribToNetCDFConvertor
 	*/
 	public static void main(String[] args) throws IOException, Exception
 	{
-		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
-		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
-	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
-		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-	  
-		File fIn = new File(fileIn);
-		//File fOut = new File(fileOut);
+
+//		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
+//		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
+//	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
+//		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
+//		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
+	
+// -g roms_grd.nc -i wrfprs_for_roms.003.grb  -o wrfprs_for_roms.003.nc
+		String fileIn = "";
+		String fileGrid = "";
+		String fileOut = "";
 		
+		for (int i=0; i < args.length; i+=2)
+		{
+			if (args[i].equals("-g") || args[i].equals("--grid"))
+				fileGrid = args[i+1];
+			else if (args[i].equals("-i") || args[i].equals("--input"))
+				fileIn = args[i+1];
+			else if (args[i].equals("-o") || args[i].equals("--output"))
+				fileOut = args[i+1];
+		}
+		
+		File fIn = new File(fileIn);
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
 		GribToNetCDFConvert(fIn, fileGrid, fileOut);
