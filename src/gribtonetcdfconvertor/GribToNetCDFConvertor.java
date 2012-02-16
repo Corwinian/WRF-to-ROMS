@@ -516,6 +516,9 @@ public class GribToNetCDFConvertor
 			
 			for(int i =0; i < neededValues.length; ++i)
 			{	
+				if (i == 124 || i == 125)
+					continue;
+				
 				String field = variables.get(neededValues[i]);
 				
 				if (field == null)
@@ -581,13 +584,13 @@ public class GribToNetCDFConvertor
 						getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]));
 				
 				windStress[0].InverseLatIfNecessary();
-				windStress[0] = InterpolateField(windStress[0], dest.getGridForVariable(127));
+				windStress[0] = InterpolateField(windStress[0], dest.getGridForVariable(124));
 
-				dest.writeField(127, windStress[0].data);
+				dest.writeField(124, windStress[0].data);
 				
 				windStress[1].InverseLatIfNecessary();
-				windStress[1] = InterpolateField(windStress[1], dest.getGridForVariable(128));
-				dest.writeField(128, windStress[1].data);
+				windStress[1] = InterpolateField(windStress[1], dest.getGridForVariable(125));
+				dest.writeField(125, windStress[1].data);
 			}
 		}
 		catch (Exception ex)

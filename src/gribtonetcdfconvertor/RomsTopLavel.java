@@ -242,8 +242,8 @@ public class RomsTopLavel
 		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
 		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "time", "u"));
 		
-		resVals.put(VariablesNums.svstr10, new RomsVariable("svstr10", "time", "v"));
-		resVals.put(VariablesNums.sustr10, new RomsVariable("sustr10", "time", "u"));
+//		resVals.put(VariablesNums.svstr10, new RomsVariable("svstr10", "time", "v"));
+//		resVals.put(VariablesNums.sustr10, new RomsVariable("sustr10", "time", "u"));
 		
 		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "time", "u"));
 		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "time", "u"));
@@ -276,11 +276,11 @@ public class RomsTopLavel
 			case 154:
 			case 81:
 			case 57:
-			case 128:
+			//case 128:
 				return grid.u;
 			case 34:
 			case 124:
-			case 127:
+			//case 127:
 				return grid.v;
 			case 11:
 			case 204:
