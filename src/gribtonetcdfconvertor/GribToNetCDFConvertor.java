@@ -330,8 +330,8 @@ public class GribToNetCDFConvertor
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i] + v[i])) ==0)
-				res.add(res.size());
+			if((Math.abs(u[i]) + Math.abs(v[i])) ==0)
+				res.add(i);
 		}
 		
 		return res;
@@ -342,8 +342,8 @@ public class GribToNetCDFConvertor
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i] + v[i])) > 0)
-				res.add(res.size());
+			if((Math.abs(u[i]) + Math.abs(v[i])) > 0)
+				res.add(i);
 		}
 		
 		return res;
@@ -363,24 +363,24 @@ public class GribToNetCDFConvertor
 	
 	private static boolean mayCalc(Complex [] c, Complex [] d1)
 	{
-		Complex max = new Complex();
+		double max = 0;
 		for (int i=0; i < d1.length; i++)
 		{
-			Complex tem = Complex.abs(c[i].minus(d1[i]));
-			if (tem.getRe() > max.getRe())
+			double tem = Complex.abs(c[i].minus(d1[i]));
+			if (tem > max)
 				max = tem;
 		}
 		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
-		return max.getRe() > 0.01;
+		return max > 0.01;
 	}
 	
 	public static ArrayList<Integer>find_c(Complex []c)
 	{
-		ArrayList<Integer> res = new ArrayList();
+		ArrayList<Integer> res = new ArrayList<>();
 		for (int i=0; i < c.length; i++)
 		{
 			if(c[i].getRe() > 11)
-				res.add(res.size());
+				res.add(i);
 		}
 		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
 		return  res;
@@ -400,7 +400,7 @@ public class GribToNetCDFConvertor
 		v = createTemp(igood, v);
 		
 		Complex[] w = new Complex[v.length];
-		Complex[] v0 = new Complex[v.length];
+		double[] v0 = new double[v.length];
 		
 		for (int i =0; i < w.length; ++i)
 		{
