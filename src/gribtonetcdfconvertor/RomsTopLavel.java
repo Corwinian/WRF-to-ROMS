@@ -167,47 +167,6 @@ public class RomsTopLavel
 	};
 	
 	
-	public enum VariablesNums 
-	{
-		Pressure(1),
-		Geopotential_height(7),
-		Potential_temperature(13),
-		Specific_humidity(51),
-		Relative_humidity(52),
-		SST(11),
-		u_wind(33),
-		v_wind(34),
-		shflux(207),
-		dQdSST(208),
-		swrad(204),
-		svstr(124),
-		sustr(125),
-		Sensible_heat_flux(122),
-		svstr10(127),
-		sustr10(128),
-		Ground_heat_flux(155),
-		Latent_heat_flux(121),
-		Ice_thickness(92),
-		Ice_concentration_ice1no_ice0(91),
-		Land_Surface_Precipitation_Accumulation_LSPA(154),
-		Land_cover_land1sea0(81),
-		Evaporation(57);	
-
-		private Integer typeValue;
-		private VariablesNums(Integer type) {typeValue = type;}
-		public Integer getTypeValue() {return typeValue;}
-		
-		static public VariablesNums  getType(Integer pType) 
-		{
-			for (VariablesNums  type: VariablesNums.values()) 
-			{
-				if (type.getTypeValue().equals(pType)) 
-					return type;
-			}
-			throw new RuntimeException("unknown type");
-		}
-	}
-	
 	static NetcdfFileWriteable cdf;
 	static String dstFile;
 	
@@ -242,9 +201,6 @@ public class RomsTopLavel
 		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
 		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "time", "u"));
 		
-//		resVals.put(VariablesNums.svstr10, new RomsVariable("svstr10", "time", "v"));
-//		resVals.put(VariablesNums.sustr10, new RomsVariable("sustr10", "time", "u"));
-		
 		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "time", "u"));
 		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "time", "u"));
 		
@@ -257,44 +213,42 @@ public class RomsTopLavel
 		createFile(time);
 }
 	
-	public RomsGrid.grid  getGridForVariable(int varNum)
+	public RomsGrid.grid  getGridForVariable(VariablesNums varNum)
 	{
 		switch(varNum)
 		{
-			case 1:
-			case 7:
-			case 13:
-			case 51:
-			case 52:
-			case 33:
-			case 125:
-			case 122:
-			case 155:
-			case 121:
-			case 92:
-			case 91:
-			case 154:
-			case 81:
-			case 57:
-			//case 128:
+			case Pressure:
+			case Geopotential_height:
+			case Potential_temperature:
+			case Specific_humidity:
+			case Relative_humidity:
+			case u_wind:
+			case sustr:
+			case Sensible_heat_flux:
+			case Ground_heat_flux:
+			case Latent_heat_flux:
+			case Ice_thickness:
+			case Ice_concentration_ice1no_ice0:
+			case Land_Surface_Precipitation_Accumulation_LSPA:
+			case Land_cover_land1sea0:
+			case Evaporation:
 				return grid.u;
-			case 34:
-			case 124:
-			//case 127:
+			case v_wind:
+			case svstr:
 				return grid.v;
-			case 11:
-			case 204:
-			case 207:
-			case 208:
+			case SST:
+			case swrad:
+			case shflux:
+			case dQdSST:
 				return grid.rho;
 			default:
 				return null;
 		}
 	}
 	
-	public void writeField(Integer fieldNum, double[][][] data)
+	public void writeField(VariablesNums fieldNum, double[][][] data)
 	{
-		NetCDFOperator.writeFieldToNetCDF(dstFile, resVals.get(VariablesNums.getType(fieldNum)).name, data);
+		NetCDFOperator.writeFieldToNetCDF(dstFile, resVals.get(fieldNum).name, data);
 	}
 	
 	public void createFile(double []time) throws IOException
@@ -324,7 +278,7 @@ public class RomsTopLavel
 				
 				Variable varr = cdf.addVariable(var.name, DataType.DOUBLE, todim);
 				
-				varr.addAttribute(new Attribute("GRIB_param_number", num.typeValue));
+	 			varr.addAttribute(new Attribute("GRIB_param_number", num.getTypeValue()));
 				varr.addAttribute(new Attribute("GRIB_param_name", var.name));
 				
 				varr.addAttribute(att);
