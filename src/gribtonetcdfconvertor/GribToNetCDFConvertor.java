@@ -504,15 +504,22 @@ public class GribToNetCDFConvertor
 		return dswr;
 	}
 	
-	public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
+	//public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
+	public static void GribToNetCDFConvert(List<String>filesIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
 		try
 		{ 
-			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
-			double time[]=loadCoords(cdf, timeName);
+			double[] time = new double[filesIn.size()];
+			
+			for (int i=0; i < filesIn.size() ; ++i)
+			{
+				cdf = NetcdfFile.open(filesIn.get(i));
+				time[i] = loadCoords(cdf, timeName)[0];
+			}
 			
 			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile, time);
+			
 			
 			GeoRectangle gr = dest.grid.getRectangle();
 			
@@ -622,6 +629,7 @@ public class GribToNetCDFConvertor
 //		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
 	
 // -g roms_grd.nc -i wrfprs_for_roms.003.grb  -o wrfprs_for_roms.003.nc
+		List<String>filesIn =  new ArrayList<>();
 		String fileIn = "";
 		String fileGrid = "";
 		String fileOut = "";
@@ -631,7 +639,8 @@ public class GribToNetCDFConvertor
 			if (args[i].equals("-g") || args[i].equals("--grid"))
 				fileGrid = args[i+1];
 			else if (args[i].equals("-i") || args[i].equals("--input"))
-				fileIn = args[i+1];
+				//fileIn = args[i+1];
+				filesIn.add(args[i+1]);
 			else if (args[i].equals("-o") || args[i].equals("--output"))
 				fileOut = args[i+1];
 		}
@@ -639,6 +648,6 @@ public class GribToNetCDFConvertor
 		File fIn = new File(fileIn);
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
-		GribToNetCDFConvert(fIn, fileGrid, fileOut);
+		GribToNetCDFConvert(filesIn, fileGrid, fileOut);
 	}
 }
