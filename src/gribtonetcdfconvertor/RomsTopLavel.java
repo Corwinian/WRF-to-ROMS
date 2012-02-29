@@ -6,9 +6,11 @@ package gribtonetcdfconvertor;
 
 import LRFD.Common.GeoRectangle;
 import LRFD.Db.NetCDFFile.NetCDFOperator;
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.*;
@@ -17,7 +19,7 @@ import ucar.nc2.*;
  *
  * @author corwin
  */
-public class RomsTopLavel 
+public final class RomsTopLavel 
 {
 	public class RomsGrid
 	{
@@ -30,7 +32,15 @@ public class RomsTopLavel
 				lon_u = "lon_u",
 				lat_u = "lat_u",
 				lon_v = "lon_v",
-				lat_v = "lat_v";
+				lat_v = "lat_v",
+
+				srt_time = "srt_time",
+				sst_time = "sst_time",
+				sss_time = "sss_time",
+				sms_time = "sms_time",
+				shf_time = "shf_time",
+				swf_time = "swf_time",
+				g_time = "g_time";
 		
 		
 		
@@ -47,15 +57,15 @@ public class RomsTopLavel
 			{
 				//NetCDFOperator.Read2DFieldFromFile(inData[t], "Temperature_surface")
 				
-				Variable var=existGrid.findVariable(coordinate);
-				List<Dimension> dims=var.getDimensions();
+				Variable var = existGrid.findVariable(coordinate);
+				List<Dimension> dims = var.getDimensions();
 				
 				if (dims.size() != 2)				
 					throw new IOException("unexpected lat dimension!");
 				
-				ucar.ma2.Array varar=var.read();
+				ucar.ma2.Array varar = var.read();
 				
-				Index ind=varar.getIndex();
+				Index ind = varar.getIndex();
 				ind.set(0, 0);
 				
 				int jn = dims.get(isLon ? 0 : 1 ).getLength();
@@ -89,14 +99,14 @@ public class RomsTopLavel
 			{
 				HashMap<String, Dimension> res = new HashMap();
 		
-				Dimension lonDim=cdf.addDimension(lon_name, lon[0].length),
-						latDim=cdf.addDimension(lat_name, lat[0].length);
+				Dimension lonDim = cdf.addDimension(lon_name, lon[0].length),
+						latDim = cdf.addDimension(lat_name, lat[0].length);
 		
-				Dimension[] lodim=new Dimension[1];
-				lodim[0]=lonDim;
+				Dimension[] lodim = new Dimension[1];
+				lodim[0] = lonDim;
 				cdf.addVariable(lon_name, DataType.DOUBLE, lodim);
 				
-				Dimension[] latim=new Dimension[1];
+				Dimension[] latim = new Dimension[1];
 				latim[0] = latDim;
 				cdf.addVariable(lat_name, DataType.DOUBLE, latim);
 				
@@ -126,7 +136,7 @@ public class RomsTopLavel
 					(float)u.getLon()[u.getLon().length-1] + 4);
 		}
 		
-		public Map<String, Dimension> createDimension(NetcdfFileWriteable cdf) throws IOException
+		public Map<String, Dimension> createDimension(NetcdfFileWriteable cdf, Integer timeLen) throws IOException
 		{
 			HashMap<String, Dimension> res = new HashMap();
 			
@@ -134,6 +144,19 @@ public class RomsTopLavel
 			res.putAll(psi.createDimension(cdf));
 			res.putAll(u.createDimension(cdf));
 			res.putAll(v.createDimension(cdf));
+			
+			String[] times = {srt_time, sst_time, sss_time, sms_time, shf_time, swf_time, g_time};
+		
+			for (int i=0; i < times.length; ++i)
+			{
+				Dimension timeDim = cdf.addDimension(times[i], timeLen);
+			
+				Dimension[] tidim = new Dimension[1];
+				tidim[0] = timeDim;
+				cdf.addVariable(times[i], DataType.DOUBLE, tidim);
+				
+				res.put(times[i], timeDim);
+			}
 			
 			return res;
 		}
@@ -160,9 +183,9 @@ public class RomsTopLavel
 		public RomsVariable(String Name, String time, String type)
 		{
 			name = Name;
-			timeName = time;
-			lonName = String.format("lon_%s",type);
-			latName = String.format("lat_%s",type);
+			timeName = String.format("%s_time", time);
+			lonName = String.format("lon_%s", type);
+			latName = String.format("lat_%s", type);
 		}
 	};
 	
@@ -180,38 +203,40 @@ public class RomsTopLavel
 		resVals = new HashMap<>(24);
 		dstFile = dst_file;
 		
-		resVals.put(VariablesNums.Pressure, new RomsVariable("Pressure", "time", "u"));
-		resVals.put(VariablesNums.Geopotential_height, new RomsVariable("Geopotential_height", "time", "u"));
+		//TODO:
+		resVals.put(VariablesNums.Pressure, new RomsVariable("Pressure", "g", "u"));
+		resVals.put(VariablesNums.Geopotential_height, new RomsVariable("Geopotential_height", "g", "u"));
 		
-		resVals.put(VariablesNums.Potential_temperature, new RomsVariable("Potential_temperature", "time", "u"));
-		resVals.put(VariablesNums.Specific_humidity, new RomsVariable("Specific_humidity", "time", "u"));
-		resVals.put(VariablesNums.Relative_humidity, new RomsVariable("Relative_humidity", "time", "u"));
+		resVals.put(VariablesNums.Potential_temperature, new RomsVariable("Potential_temperature", "g", "u"));
+		resVals.put(VariablesNums.Specific_humidity, new RomsVariable("Specific_humidity", "g", "u"));
+		resVals.put(VariablesNums.Relative_humidity, new RomsVariable("Relative_humidity", "g", "u"));
 		
-		resVals.put(VariablesNums.SST, new RomsVariable("SST", "time", "rho"));//Temperature surfase
+		resVals.put(VariablesNums.SST, new RomsVariable("SST", "sst", "rho"));//Temperature surfase
 		
-		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "time", "u"));
-		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "time", "v"));
+		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "g", "u"));
+		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "g", "v"));
 		
-		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "time", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
-		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "time", "rho"));
+		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "shf", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
+		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "sst", "rho"));
 		
-		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "time", "rho")); //Downward_short_wave_flux
+		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srt", "rho")); //Downward_short_wave_flux
 		
-		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "time", "v"));//Zonal_momentum_flux
-		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "time", "u")); //Meridional_momentum_flux
-		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "time", "u"));
+		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "sms", "v"));//Zonal_momentum_flux
+		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "sms", "u")); //Meridional_momentum_flux
+		//FEXME: подумать над названием 
+		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "g", "u"));
 		
-		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "time", "u"));
-		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "time", "u"));
+		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "g", "u"));
+		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "g", "u"));
 		
-		resVals.put(VariablesNums.Ice_thickness, new RomsVariable("Ice_thickness", "time", "u"));
-		resVals.put(VariablesNums.Ice_concentration_ice1no_ice0, new RomsVariable("Ice_concentration_ice1no_ice0", "time", "u"));
+		resVals.put(VariablesNums.Ice_thickness, new RomsVariable("Ice_thickness", "g", "u"));
+		resVals.put(VariablesNums.Ice_concentration_ice1no_ice0, new RomsVariable("Ice_concentration_ice1no_ice0", "g", "u"));
 		
-		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "time", "u"));
-		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "time", "u"));
-		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "time", "u"));
+		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "g", "u"));
+		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "g", "u"));
+		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "g", "u"));
 		createFile(time);
-}
+	}
 	
 	public RomsGrid.grid  getGridForVariable(VariablesNums varNum)
 	{
@@ -257,13 +282,8 @@ public class RomsTopLavel
 		{
 			cdf = NetcdfFileWriteable.createNew(dstFile);
 			
-			Dimension timeDim = cdf.addDimension("time", time.length);
-			Map<String,Dimension> Dimensions = grid.createDimension(cdf);
+			Map<String,Dimension> Dimensions = grid.createDimension(cdf, time.length);
 
-			Dimension[] timeDimArr=new Dimension[1];
-			timeDimArr[0]=timeDim;
-			cdf.addVariable("time", DataType.DOUBLE, timeDimArr);
-			
 			Attribute att = new Attribute("missing_value", -9999);
 			
 			for(Iterator<VariablesNums> i = resVals.keySet().iterator(); i.hasNext();)
@@ -272,7 +292,7 @@ public class RomsTopLavel
 				RomsVariable var = resVals.get(num);
 				Dimension[] todim = new Dimension[3];
 				
-				todim[0] = timeDim;				
+				todim[0] = Dimensions.get(var.timeName);				
 				todim[1] = Dimensions.get(var.latName); 
 				todim[2] = Dimensions.get(var.lonName); 
 				
@@ -289,11 +309,11 @@ public class RomsTopLavel
 			
 			for(Iterator<String> i = Dimensions.keySet().iterator(); i.hasNext();)
 			{
-				String buf= i.next();
-				NetCDFOperator.writeTimeToNetCDF(dstFile, buf, grid.getParam(buf));
+				String buf = i.next();
+				NetCDFOperator.writeTimeToNetCDF(dstFile, buf,
+						buf.substring(4).equals("time") ||  buf.substring(2).equals("time") 
+						?  time : grid.getParam(buf));
 			}
-			
-			NetCDFOperator.writeTimeToNetCDF(dstFile, "time", time);
 		}
 		catch (Exception er)
 		{
