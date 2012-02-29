@@ -50,7 +50,7 @@ public class GribToNetCDFConvertor
 		VariablesNums.SST,//Skin temperature
 		VariablesNums.u_wind,//10 M u component wind
 		VariablesNums.v_wind,//10 M v component wind
-		VariablesNums.dsrad ,//Incoming surface shortwave radiation — time-averaged
+	//	VariablesNums.dsrad ,//Incoming surface shortwave radiation — time-averaged
 		VariablesNums.svstr,//Surface u wind stress
 		VariablesNums.sustr,//Surface v wind stress
 		VariablesNums.Sensible_heat_flux,//Surface sensible heat flux — time-averaged
@@ -74,14 +74,20 @@ public class GribToNetCDFConvertor
 		{ 
 			Attribute atr = variables.get(i).findAttribute("GRIB_param_number");
 			
-			if (atr != null)
+			try
 			{
-				if ((Integer)atr.getValue(0) == 11 &&
-					variables.get(i).getName().equals("Temperature"))
-					map.put(VariablesNums.Temperature, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
-				else			
-					map.put(VariablesNums.getType((Integer)atr.getValue(0)), variables.get(i).getName());
+				//FIXME:потом исправить
+				if (atr != null)
+				{
+					if ((Integer)atr.getValue(0) == 11 &&
+						variables.get(i).getName().equals("Temperature"))
+						map.put(VariablesNums.Temperature, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
+					else			
+						map.put(VariablesNums.getType((Integer)atr.getValue(0)), variables.get(i).getName());
+				}
 			}
+			catch(Exception ex)
+				{}
 		}
 		
 		return map;
@@ -201,7 +207,7 @@ public class GribToNetCDFConvertor
 		if (!(var.getRank()==3 || (var.getRank()==4 && var.getDimension(1).getLength()==1))) 
 			throw new Exception("Error in Dimensions, Rank of dimensions for variable "+var.getName()+" must be 3.");
 		
-		String lvName = (FieldName.equals("Specific_humidity") || FieldName.equals("Relative_humidity")) ?
+		String lvName = (FieldName.equals("Specific_humidity") || FieldName.equals("Relative_humidity")	|| FieldName.equals("Temperature")) ?
 				level1Name : levelName ;
 		String tmName = (FieldName.equals("Evaporation") || FieldName.equals("Land_Surface_Precipitation_Accumulation_LSPA")) ?
 				time1Name : timeName;
@@ -540,10 +546,10 @@ public class GribToNetCDFConvertor
 			{
 				System.out.println("shflux");
 
-				Data3DField shflux = CalcShflux(getFieldFromSRCFile(cdf, variables.get(204), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(205), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(211), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(212), gr, time[0], time[time.length -1]));
+				Data3DField shflux = CalcShflux(getFieldFromSRCFile(cdf, variables.get(VariablesNums.dsrad), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(VariablesNums.dlrad), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(VariablesNums.usrad), gr, time[0], time[time.length -1]),
+							getFieldFromSRCFile(cdf, variables.get(VariablesNums.ulrad), gr, time[0], time[time.length -1]));
 
 				shflux.InverseLatIfNecessary();
 				shflux = InterpolateField(shflux, dest.getGridForVariable(VariablesNums.shflux));
@@ -555,6 +561,7 @@ public class GribToNetCDFConvertor
 				System.out.println("dQdSST");
 				CreateForcing forsing = new CreateForcing(fileIn.getAbsolutePath());
 				
+				getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]);
 				//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
 				Data3DField dQdSST= forsing.getdQdSST(
 					getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]),
