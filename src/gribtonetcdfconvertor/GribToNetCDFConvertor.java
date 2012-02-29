@@ -26,7 +26,7 @@ import java.lang.Math;
 import java.math.MathContext;
 
 
-/**
+ /**
  *
  * @author corwin
  */
@@ -40,37 +40,35 @@ public class GribToNetCDFConvertor
 	private static String levelName = "height_above_ground";
 	private static String level1Name = "height_above_ground1";
 	
-	private static int[] neededValues = {
-		1,//Surface pressure
-		7,//Terrain height
-		13,//Skin potential temperature
-		51,//Skin specific humidity
-		52,//Skin Relative humidity
-		11,//Skin temperature
-		33,//10 M u component wind
-		34,//10 M v component wind
-		204,//Incoming surface shortwave radiation — time-averaged
-//		205,//Incoming surface longwave radiation - time-averaged
-//		211,//Outgoing surface shortwave radiation - time-averaged			
-//		212,//Outgoing surface longwave radiation – time-averaged
-		124,//Surface u wind stress
-		125,//Surface v wind stress
-		122,//Surface sensible heat flux — time-averaged
-		155,//Ground heat flux — time-averaged
-		121,//Surface latent heat flux — time-averaged
-		172,//Surface momentum flux — time-averaged
-		91,//Sea ice mask
-		92,//Ice thickness
-		81,//Land sea mask (land=1, sea=0)
-		154,//Accumulated land surface model precipitation
-		57,//Accumulated surface evaporation
+	private static VariablesNums[] neededValues = {
+		VariablesNums.Pressure,//Surface pressure
+		VariablesNums.Geopotential_height,
+		//Terrain height
+		VariablesNums.Potential_temperature,//Skin potential temperature
+		VariablesNums.Specific_humidity,//Skin specific humidity
+		VariablesNums.Relative_humidity,//Skin Relative humidity
+		VariablesNums.SST,//Skin temperature
+		VariablesNums.u_wind,//10 M u component wind
+		VariablesNums.v_wind,//10 M v component wind
+		VariablesNums.dsrad ,//Incoming surface shortwave radiation — time-averaged
+		VariablesNums.svstr,//Surface u wind stress
+		VariablesNums.sustr,//Surface v wind stress
+		VariablesNums.Sensible_heat_flux,//Surface sensible heat flux — time-averaged
+		VariablesNums.Ground_heat_flux,//Ground heat flux — time-averaged
+		VariablesNums.Latent_heat_flux,//Surface latent heat flux — time-averaged
+	//	172,//
+		VariablesNums.Ice_concentration_ice1no_ice0,//Sea ice mask
+		VariablesNums.Ice_thickness,//Ice thickness
+		VariablesNums.Land_cover_land1sea0,//Land sea mask (land=1, sea=0)
+		VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA,//Accumulated land surface model precipitation
+		VariablesNums.Evaporation,//Accumulated surface evaporation
 	};
 	
-	private static Map<Integer, String> getVariablesByNums(NetcdfFile cdf) throws IOException
+	private static Map<VariablesNums, String> getVariablesByNums(NetcdfFile cdf) throws IOException
 	{
 		List<Variable> variables = cdf.getVariables();
 		
-		Map<Integer, String> map = new HashMap<Integer, String>();
+		Map<VariablesNums, String> map = new HashMap<>();
 		/*я не нашел как сделать через итераторы, поэтому сделал так*/
 		for(int i = 0; i < variables.size(); ++i)
 		{ 
@@ -80,9 +78,9 @@ public class GribToNetCDFConvertor
 			{
 				if ((Integer)atr.getValue(0) == 11 &&
 					variables.get(i).getName().equals("Temperature"))
-					map.put(12, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
+					map.put(VariablesNums.Temperature, variables.get(i).getName()); //сделал из-за то что у температуры и температуры поверхности одинаковые номера
 				else			
-					map.put((Integer)atr.getValue(0), variables.get(i).getName());
+					map.put(VariablesNums.getType((Integer)atr.getValue(0)), variables.get(i).getName());
 			}
 		}
 		
@@ -332,8 +330,8 @@ public class GribToNetCDFConvertor
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i] + v[i])) ==0)
-				res.add(res.size());
+			if((Math.abs(u[i]) + Math.abs(v[i])) ==0)
+				res.add(i);
 		}
 		
 		return res;
@@ -344,8 +342,8 @@ public class GribToNetCDFConvertor
 		ArrayList<Integer> res = new ArrayList<Integer>();
 		for (int i=0; i < u.length; ++i)
 		{
-			if((Math.abs(u[i] + v[i])) > 0)
-				res.add(res.size());
+			if((Math.abs(u[i]) + Math.abs(v[i])) > 0)
+				res.add(i);
 		}
 		
 		return res;
@@ -365,24 +363,24 @@ public class GribToNetCDFConvertor
 	
 	private static boolean mayCalc(Complex [] c, Complex [] d1)
 	{
-		Complex max = new Complex();
+		double max = 0;
 		for (int i=0; i < d1.length; i++)
 		{
-			Complex tem = Complex.abs(c[i].minus(d1[i]));
-			if (tem.getRe() > max.getRe())
+			double tem = Complex.abs(c[i].minus(d1[i]));
+			if (tem > max)
 				max = tem;
 		}
 		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
-		return max.getRe() > 0.01;
+		return max > 0.01;
 	}
 	
 	public static ArrayList<Integer>find_c(Complex []c)
 	{
-		ArrayList<Integer> res = new ArrayList();
+		ArrayList<Integer> res = new ArrayList<>();
 		for (int i=0; i < c.length; i++)
 		{
 			if(c[i].getRe() > 11)
-				res.add(res.size());
+				res.add(i);
 		}
 		//TODO: подумать а правильно ли проверяю, не нужноли еще проверять мнмую часть
 		return  res;
@@ -402,7 +400,7 @@ public class GribToNetCDFConvertor
 		v = createTemp(igood, v);
 		
 		Complex[] w = new Complex[v.length];
-		Complex[] v0 = new Complex[v.length];
+		double[] v0 = new double[v.length];
 		
 		for (int i =0; i < w.length; ++i)
 		{
@@ -505,17 +503,20 @@ public class GribToNetCDFConvertor
 		NetcdfFile cdf = null;
 		try
 		{ 
-			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile);
+			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
+			double time[]=loadCoords(cdf, timeName);
+			
+			RomsTopLavel dest  = new RomsTopLavel(outFile, gridFile, time);
 			
 			GeoRectangle gr = dest.grid.getRectangle();
-			cdf = NetcdfFile.open(fileIn.getAbsolutePath());
-
-			Map<Integer, String> variables = getVariablesByNums(cdf);
 			
-			double time[]=loadCoords(cdf, timeName);
-
+			Map<VariablesNums, String> variables = getVariablesByNums(cdf);
+			
 			for(int i =0; i < neededValues.length; ++i)
 			{	
+				if (i == 124 || i == 125)
+					continue;
+				
 				String field = variables.get(neededValues[i]);
 				
 				if (field == null)
@@ -545,9 +546,9 @@ public class GribToNetCDFConvertor
 							getFieldFromSRCFile(cdf, variables.get(212), gr, time[0], time[time.length -1]));
 
 				shflux.InverseLatIfNecessary();
-				shflux = InterpolateField(shflux, dest.getGridForVariable(207));
+				shflux = InterpolateField(shflux, dest.getGridForVariable(VariablesNums.shflux));
 
-				dest.writeField(207, shflux.data);
+				dest.writeField(VariablesNums.shflux, shflux.data);
 			}
 			
 			{
@@ -556,38 +557,38 @@ public class GribToNetCDFConvertor
 				
 				//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
 				Data3DField dQdSST= forsing.getdQdSST(
-					getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
-					getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),						
-					getFieldFromSRCFile(cdf, variables.get(11), gr, time[0], time[time.length -1]),						
-					getFieldFromSRCFile(cdf, variables.get(33), gr, time[0], time[time.length -1]),
-					getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]),						 
+					getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]),
+					getFieldFromSRCFile(cdf, variables.get(VariablesNums.Specific_humidity), gr, time[0], time[time.length -1]),						
+					getFieldFromSRCFile(cdf, variables.get(VariablesNums.SST), gr, time[0], time[time.length -1]),						
+					getFieldFromSRCFile(cdf, variables.get(VariablesNums.u_wind), gr, time[0], time[time.length -1]),
+					getFieldFromSRCFile(cdf, variables.get(VariablesNums.v_wind), gr, time[0], time[time.length -1]),						 
 					//расчет поля плотности влажного воздуха
 					forsing.getAirDensity(
-						getFieldFromSRCFile(cdf, variables.get(12), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(51), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(1), gr, time[0], time[time.length -1]))
+						getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]),
+						getFieldFromSRCFile(cdf, variables.get(VariablesNums.Specific_humidity), gr, time[0], time[time.length -1]),
+						getFieldFromSRCFile(cdf, variables.get(VariablesNums.Pressure), gr, time[0], time[time.length -1]))
 					);
 				
 				dQdSST.InverseLatIfNecessary();
-				dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(208));
+				dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(VariablesNums.dQdSST));
 
-				dest.writeField(208, dQdSST.data);
+				dest.writeField(VariablesNums.dQdSST, dQdSST.data);
 			}
 			{
 				
 				System.out.println("windStress");
 				Data3DField[] windStress = CalcWstress(
-						getFieldFromSRCFile(cdf, variables.get(33), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(34), gr, time[0], time[time.length -1]));
+						getFieldFromSRCFile(cdf, variables.get(VariablesNums.u_wind), gr, time[0], time[time.length -1]),
+						getFieldFromSRCFile(cdf, variables.get(VariablesNums.v_wind), gr, time[0], time[time.length -1]));
 				
 				windStress[0].InverseLatIfNecessary();
-				windStress[0] = InterpolateField(windStress[0], dest.getGridForVariable(127));
+				windStress[0] = InterpolateField(windStress[0], dest.getGridForVariable(VariablesNums.sustr));
 
-				dest.writeField(127, windStress[0].data);
+				dest.writeField(VariablesNums.sustr, windStress[0].data);
 				
 				windStress[1].InverseLatIfNecessary();
-				windStress[1] = InterpolateField(windStress[1], dest.getGridForVariable(128));
-				dest.writeField(128, windStress[1].data);
+				windStress[1] = InterpolateField(windStress[1], dest.getGridForVariable(VariablesNums.sustr));
+				dest.writeField(VariablesNums.sustr, windStress[1].data);
 			}
 		}
 		catch (Exception ex)
@@ -601,22 +602,34 @@ public class GribToNetCDFConvertor
 	}
 
 	
-	
-	
    /**
 	* @param args the command line arguments
 	*/
 	public static void main(String[] args) throws IOException, Exception
 	{
-		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
-		String fileIn ="/media/C2BE-74F3/Курсовик/project/wrf/wrfprs_for_roms.003.grb";
-	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
-		String fileGrid = "/media/C2BE-74F3/Курсовик/wrf/roms_grd.nc";
-		String fileOut = "./wrfprs_for_roms.003.nc";
-	  
-		File fIn = new File(fileIn);
-		//File fOut = new File(fileOut);
+
+//		//String fileIn = "/home/corwin/Dropbox/Учеба/Курсовик/wrfprs.000.grb";
+//		String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.grb";
+//	//	String fileIn ="/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
+//		String fileGrid = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/roms_grd.nc";
+//		String fileOut = "/home/corwin/Dropbox/Учеба/Курсовик/wrf/wrfprs_for_roms.003.nc";
+	
+// -g roms_grd.nc -i wrfprs_for_roms.003.grb  -o wrfprs_for_roms.003.nc
+		String fileIn = "";
+		String fileGrid = "";
+		String fileOut = "";
 		
+		for (int i=0; i < args.length; i+=2)
+		{
+			if (args[i].equals("-g") || args[i].equals("--grid"))
+				fileGrid = args[i+1];
+			else if (args[i].equals("-i") || args[i].equals("--input"))
+				fileIn = args[i+1];
+			else if (args[i].equals("-o") || args[i].equals("--output"))
+				fileOut = args[i+1];
+		}
+		
+		File fIn = new File(fileIn);
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
 		GribToNetCDFConvert(fIn, fileGrid, fileOut);

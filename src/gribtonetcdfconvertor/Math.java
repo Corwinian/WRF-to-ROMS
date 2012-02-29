@@ -11,6 +11,11 @@ import java.lang.Math;
  */
 //скопировал класс комплекс из книги, тк как я понял в java нет класса комплексных чисел О_О
 //
+
+/**
+ *
+ * @author corwin
+ */
 class Complex  
 {
 	private static final double EPS = 1e-12; // Точность вычислений  
@@ -75,8 +80,8 @@ class Complex
 
 	// Методы, реализующие операции +, -, *, /  
 
-	public static Complex abs(Complex z){ return new Complex(Math.abs(z.re), Math.abs(z.im));}
-	public Complex abs(){ return Complex.abs(this);}
+	public static double abs(Complex z){ return z.mod();}
+	public double abs(){ return Complex.abs(this);}
 	
 	public Complex plus(double z){ return plus(this, new Complex(z));}
 	public Complex plus(Complex z){ return Complex.plus(this, z);}
@@ -98,7 +103,7 @@ class Complex
 	public static Complex asterisk(Complex a, double b){ return asterisk (a, new Complex(b));}	
 	public static Complex asterisk(Complex a, Complex b)
 	{
-		return new Complex( a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+		return new Complex( a.re * b.re - a.im * b.im, a.im * b.re + a.re * b.im);
 	}
 	
 	public Complex slash(double z){ return slash(this, new Complex(z));}
@@ -107,12 +112,7 @@ class Complex
 	public static Complex slash(Complex a, double b){ return slash (a, new Complex(b));}	
 	public static Complex slash(Complex a, Complex b)
 	{ 
-		double m = b.mod();  
-		return new Complex((a.re * b.re - a.im * b.im) / m, (a.im * b.re - a.re * b.im) / m); 
+		double m = (b.re *b.re) + (b.im *b.im);  
+		return new Complex((a.re * b.re + a.im * b.im) / m, (a.im * b.re - a.re * b.im) / m); 
 	}
-};
-
-class Vectorr
-{
-	
 };
