@@ -529,8 +529,9 @@ public class GribToNetCDFConvertor
 
 				String field = variables.get(neededValues[0]);
 
-				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
+				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[0]);
 				SST.data = new double[time.length][SST.data[0].length][SST.data[0][0].length];
+				SST.time = time.clone();
 				
 				for(Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
@@ -550,7 +551,7 @@ public class GribToNetCDFConvertor
 				for (Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
 					VariablesNums var = i.next();
-					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var),	gr, time[0], time[time.length -1]);
+					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[c], time[c]);
 					fields.get(var).data[c] = SST.data[0].clone();
 				}
 			}
