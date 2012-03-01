@@ -510,13 +510,13 @@ public class GribToNetCDFConvertor
 		NetcdfFile cdf = null;
 		try
 		{ 
-			double[] time = new double[filesIn.size()];
+			double[] time = {3, 4, 15, 204, 345, 350} ;//new double[filesIn.size()];
 			
-			for (int i=0; i < filesIn.size() ; ++i)
-			{
-				cdf = NetcdfFile.open(filesIn.get(i));
-				time[i] = loadCoords(cdf, timeName)[0];
-			}
+//			for (int i=0; i < filesIn.size() ; ++i)
+//			{
+//				cdf = NetcdfFile.open(filesIn.get(i));
+//				time[i] = loadCoords(cdf, timeName)[0];
+//			}
 			
 			RomsTopLavel dest = new RomsTopLavel(outFile, gridFile, time);
 			GeoRectangle gr = dest.grid.getRectangle();
@@ -551,7 +551,8 @@ public class GribToNetCDFConvertor
 				for (Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
 					VariablesNums var = i.next();
-					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[c], time[c]);
+					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[0], time[0]);
+					//Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[c], time[c]);
 					fields.get(var).data[c] = SST.data[0].clone();
 				}
 			}
