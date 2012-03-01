@@ -547,12 +547,11 @@ public class GribToNetCDFConvertor
 				
 				variables = getVariablesByNums(cdf);
 
-				for (int i=0; i < neededValues.length; ++i)
+				for (Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
-					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(neededValues[i]),
-						gr, time[0], time[time.length -1]);
-
-					fields.get(neededValues[i]).data[c] = SST.data[0].clone();
+					VariablesNums var = i.next();
+					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var),	gr, time[0], time[time.length -1]);
+					fields.get(var).data[c] = SST.data[0].clone();
 				}
 			}
 
