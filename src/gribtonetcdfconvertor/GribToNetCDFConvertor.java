@@ -531,11 +531,11 @@ public class GribToNetCDFConvertor
 
 				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
 				SST.data = new double[time.length][SST.data[0].length][SST.data[0][0].length];
-							
+				
 				for(Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
 					VariablesNums var = i.next();
-					fields.put(var, SST);
+					fields.put(var, SST.copy());
 				}
 			}
 			
@@ -547,7 +547,7 @@ public class GribToNetCDFConvertor
 				
 				variables = getVariablesByNums(cdf);
 
-				for (int i=0; i < filesIn.size() ; ++i)
+				for (int i=0; i < neededValues.length; ++i)
 				{
 					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(neededValues[i]),
 						gr, time[0], time[time.length -1]);
@@ -572,9 +572,10 @@ public class GribToNetCDFConvertor
 				}
 				
 				System.out.println("shflux");
-				loaded.put(VariablesNums.shflux, 
-						CalcShflux(fields.get(VariablesNums.dsrad), fields.get(VariablesNums.dlrad), 
-						fields.get(VariablesNums.usrad), fields.get(VariablesNums.ulrad)));
+				Data3DField teemp = CalcShflux(fields.get(VariablesNums.dsrad), fields.get(VariablesNums.dlrad), 
+						fields.get(VariablesNums.usrad), fields.get(VariablesNums.ulrad));
+				loaded.put(VariablesNums.shflux, teemp
+						);
 						
 				System.out.println("dQdSST");
 				//WARNING: не уверен насколько ето верно что что б не дублировать код 
