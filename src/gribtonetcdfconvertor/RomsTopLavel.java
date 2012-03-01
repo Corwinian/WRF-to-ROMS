@@ -197,6 +197,8 @@ public final class RomsTopLavel
 	
 	Map<VariablesNums, RomsVariable> resVals;
 	
+	public Map<VariablesNums, RomsVariable> getResVals() {return resVals;}
+	
 	public RomsTopLavel(String dst_file, String gridFile, double  []time) throws IOException
 	{
 		grid = new RomsGrid(gridFile);

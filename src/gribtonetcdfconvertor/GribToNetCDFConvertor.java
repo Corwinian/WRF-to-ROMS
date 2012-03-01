@@ -532,12 +532,28 @@ public class GribToNetCDFConvertor
 				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
 				SST.data = new double[time.length][SST.data[0].length][SST.data[0][0].length];
 							
-				for(Iterator<VariablesNums> i = resVals.keySet().iterator(); i.hasNext();)
+				for(Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
-					fields.put(i, SST);
+					VariablesNums var = i.next();
+					fields.put(var, SST);
 				}
 			}
 			
+			for (int c = 0; c < filesIn.size(); ++c)
+			{	
+				cdf = NetcdfFile.open(filesIn.get(c));
+				
+				Map<VariablesNums, String> variables = getVariablesByNums(cdf);
+
+				for (int i=0; i < filesIn.size() ; ++i)
+				{
+					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(neededValues[i]),
+						gr, time[0], time[time.length -1]);
+
+					fields.get(neededValues[i]).data[c] = SST.data[0].clone();
+				}
+			}
+
 			for (int c=0; c < filesIn.size() ; ++c)
 			{	
 				cdf = NetcdfFile.open(filesIn.get(c));
@@ -567,6 +583,7 @@ public class GribToNetCDFConvertor
 					SST = InterpolateField(SST, dest.getGridForVariable(neededValues[i]));
 					SST.InverseLatIfNecessary();
 					
+
 					fields.get(neededValues[i]).data[c] = SST.data[0].clone();
 				}
 
