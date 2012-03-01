@@ -521,6 +521,23 @@ public class GribToNetCDFConvertor
 			RomsTopLavel dest = new RomsTopLavel(outFile, gridFile, time);
 			GeoRectangle gr = dest.grid.getRectangle();
 			
+			Map<VariablesNums, Data3DField> fields = new HashMap<>(dest.getResVals().size());
+			{
+				cdf = NetcdfFile.open(filesIn.get(0));
+								
+				Map<VariablesNums, String> variables = getVariablesByNums(cdf);
+
+				String field = variables.get(neededValues[0]);
+
+				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
+				SST.data = new double[time.length][SST.data[0].length][SST.data[0][0].length];
+							
+				for(Iterator<VariablesNums> i = resVals.keySet().iterator(); i.hasNext();)
+				{
+					fields.put(i, SST);
+				}
+			}
+			
 			for (int c=0; c < filesIn.size() ; ++c)
 			{	
 				cdf = NetcdfFile.open(filesIn.get(c));
@@ -542,14 +559,15 @@ public class GribToNetCDFConvertor
 					}
 
 					System.out.println(field);
-
+					 //SST = fields.get(neededValues[i]);
+					
 					Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
 
 					SST.InverseLatIfNecessary();
 					SST = InterpolateField(SST, dest.getGridForVariable(neededValues[i]));
 					SST.InverseLatIfNecessary();
-
-					dest.writeField(neededValues[i], SST.data);
+					
+					fields.get(neededValues[i]).data[c] = SST.data[0].clone();
 				}
 
 				//write shflux
