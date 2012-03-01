@@ -539,11 +539,13 @@ public class GribToNetCDFConvertor
 				}
 			}
 			
+			Map<VariablesNums, String> variables = null;
+
 			for (int c = 0; c < filesIn.size(); ++c)
 			{	
 				cdf = NetcdfFile.open(filesIn.get(c));
 				
-				Map<VariablesNums, String> variables = getVariablesByNums(cdf);
+				variables = getVariablesByNums(cdf);
 
 				for (int i=0; i < filesIn.size() ; ++i)
 				{
@@ -554,94 +556,49 @@ public class GribToNetCDFConvertor
 				}
 			}
 
-			for (int c=0; c < filesIn.size() ; ++c)
-			{	
-				cdf = NetcdfFile.open(filesIn.get(c));
-				String fileIn = filesIn.get(c);
-				
-				Map<VariablesNums, String> variables = getVariablesByNums(cdf);
-
-				for(int i =0; i < neededValues.length; ++i)
-				{	
-					if (i == 124 || i == 125)
-						continue;
-
+			Map<VariablesNums, Data3DField> loaded = new HashMap<>(dest.getResVals().size());
+			
+			{
+				for(int i = 0; i < neededValues.length; ++i)
+				{
 					String field = variables.get(neededValues[i]);
-
 					if (field == null)
 					{
 						System.out.println(String.format("Can't find variavle with number: %d", neededValues[i]));
 						continue;
 					}
-
 					System.out.println(field);
-					 //SST = fields.get(neededValues[i]);
-					
-					Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[time.length -1]);
-
-					SST.InverseLatIfNecessary();
-					SST = InterpolateField(SST, dest.getGridForVariable(neededValues[i]));
-					SST.InverseLatIfNecessary();
-					
-
-					fields.get(neededValues[i]).data[c] = SST.data[0].clone();
+					loaded.put(neededValues[i], fields.get(neededValues[i]));
 				}
-
-				//write shflux
-				{
-					System.out.println("shflux");
-
-					Data3DField shflux = CalcShflux(getFieldFromSRCFile(cdf, variables.get(VariablesNums.dsrad), gr, time[0], time[time.length -1]),
-								getFieldFromSRCFile(cdf, variables.get(VariablesNums.dlrad), gr, time[0], time[time.length -1]),
-								getFieldFromSRCFile(cdf, variables.get(VariablesNums.usrad), gr, time[0], time[time.length -1]),
-								getFieldFromSRCFile(cdf, variables.get(VariablesNums.ulrad), gr, time[0], time[time.length -1]));
-
-					shflux.InverseLatIfNecessary();
-					shflux = InterpolateField(shflux, dest.getGridForVariable(VariablesNums.shflux));
-
-					dest.writeField(VariablesNums.shflux, shflux.data);
-				}
-
-				{
-					System.out.println("dQdSST");
-					CreateForcing forsing = new CreateForcing(fileIn);
-
-					getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]);
-					//FIXME: я очень не уверен что подставил именно те переменнные которые нужны
-					Data3DField dQdSST= forsing.getdQdSST(
-						getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(VariablesNums.Specific_humidity), gr, time[0], time[time.length -1]),						
-						getFieldFromSRCFile(cdf, variables.get(VariablesNums.SST), gr, time[0], time[time.length -1]),						
-						getFieldFromSRCFile(cdf, variables.get(VariablesNums.u_wind), gr, time[0], time[time.length -1]),
-						getFieldFromSRCFile(cdf, variables.get(VariablesNums.v_wind), gr, time[0], time[time.length -1]),						 
-						//расчет поля плотности влажного воздуха
-						forsing.getAirDensity(
-							getFieldFromSRCFile(cdf, variables.get(VariablesNums.Temperature), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(VariablesNums.Specific_humidity), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(VariablesNums.Pressure), gr, time[0], time[time.length -1]))
-						);
-
-					dQdSST.InverseLatIfNecessary();
-					dQdSST = InterpolateField(dQdSST, dest.getGridForVariable(VariablesNums.dQdSST));
-
-					dest.writeField(VariablesNums.dQdSST, dQdSST.data);
-				}
-				{
-
-					System.out.println("windStress");
-					Data3DField[] windStress = CalcWstress(
-							getFieldFromSRCFile(cdf, variables.get(VariablesNums.u_wind), gr, time[0], time[time.length -1]),
-							getFieldFromSRCFile(cdf, variables.get(VariablesNums.v_wind), gr, time[0], time[time.length -1]));
-
-					windStress[0].InverseLatIfNecessary();
-					windStress[0] = InterpolateField(windStress[0], dest.getGridForVariable(VariablesNums.sustr));
-
-					dest.writeField(VariablesNums.sustr, windStress[0].data);
-
-					windStress[1].InverseLatIfNecessary();
-					windStress[1] = InterpolateField(windStress[1], dest.getGridForVariable(VariablesNums.sustr));
-					dest.writeField(VariablesNums.sustr, windStress[1].data);
-				}
+				
+				System.out.println("shflux");
+				loaded.put(VariablesNums.shflux, 
+						CalcShflux(fields.get(VariablesNums.dsrad), fields.get(VariablesNums.dlrad), 
+						fields.get(VariablesNums.usrad), fields.get(VariablesNums.ulrad)));
+						
+				System.out.println("dQdSST");
+				//WARNING: не уверен насколько ето верно что что б не дублировать код 
+				//с другого модуля имеет смысл сделать вот такое вот
+				CreateForcing forsing = new CreateForcing(filesIn.get(0));
+				//WARNING: я очень не уверен что подставил именно те переменнные которые нужны
+				loaded.put(VariablesNums.dQdSST, forsing.getdQdSST(
+							fields.get(VariablesNums.Temperature),
+							fields.get(VariablesNums.Specific_humidity),
+							fields.get(VariablesNums.SST),
+							fields.get(VariablesNums.u_wind),
+							fields.get(VariablesNums.v_wind),
+							forsing.getAirDensity(
+								fields.get(VariablesNums.Temperature),
+								fields.get(VariablesNums.Specific_humidity),
+								fields.get(VariablesNums.Pressure)
+							)
+						));
+				
+				System.out.println("windStress");
+				Data3DField[] windStress = CalcWstress(fields.get(VariablesNums.u_wind), fields.get(VariablesNums.v_wind));
+							
+				loaded.put(VariablesNums.sustr, windStress[0]);
+				loaded.put(VariablesNums.svstr, windStress[1]);
 			}
 		}
 		catch (Exception ex)
