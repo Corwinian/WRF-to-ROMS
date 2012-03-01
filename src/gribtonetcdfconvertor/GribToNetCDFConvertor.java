@@ -601,14 +601,13 @@ public class GribToNetCDFConvertor
 				loaded.put(VariablesNums.svstr, windStress[1]);
 			}
 			
-			for(Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
+			for(Iterator<VariablesNums> i = loaded.keySet().iterator(); i.hasNext();)
 			{
 				VariablesNums var = i.next();
 				
 				Data3DField field = loaded.get(var);
 				field.InverseLatIfNecessary();
-				dest.writeField(var, loaded.put(var, 
-						InterpolateField(field, dest.getGridForVariable(var))).data);
+				dest.writeField(var, InterpolateField(field, dest.getGridForVariable(var)).data);
 			}
 		}
 		catch (Exception ex)
