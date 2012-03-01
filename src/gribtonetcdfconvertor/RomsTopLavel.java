@@ -288,6 +288,9 @@ public final class RomsTopLavel
 
 			Attribute att = new Attribute("missing_value", -9999);
 			
+			
+			//my_var:coordinates = "lon lat" ;
+			
 			for(Iterator<VariablesNums> i = resVals.keySet().iterator(); i.hasNext();)
 			{
 				VariablesNums num = i.next();
@@ -303,6 +306,7 @@ public final class RomsTopLavel
 	 			varr.addAttribute(new Attribute("GRIB_param_number", num.getTypeValue()));
 				varr.addAttribute(new Attribute("GRIB_param_name", var.name));
 				
+				varr.addAttribute(new Attribute("coordinates", String.format("%s %s", var.lonName, var.latName)));
 				varr.addAttribute(att);
 			}
 			
