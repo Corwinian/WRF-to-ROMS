@@ -34,7 +34,7 @@ public final class RomsTopLavel
 				lon_v = "lon_v",
 				lat_v = "lat_v",
 
-				srt_time = "srt_time",
+				srf_time = "srf_time",
 				sst_time = "sst_time",
 				sss_time = "sss_time",
 				sms_time = "sms_time",
@@ -68,9 +68,10 @@ public final class RomsTopLavel
 				Index ind = varar.getIndex();
 				ind.set(0, 0);
 				
-				int jn = dims.get(isLon ? 0 : 1 ).getLength();
-				int kn = dims.get(isLon ? 1 : 0 ).getLength();
+				int jn = dims.get(0).getLength();
+				int kn = dims.get(1).getLength();
 				
+				//double res[][] = new double[isLon ? jn : kn][isLon ? kn : jn];
 				double res[][] = new double[isLon ? jn : kn][isLon ? kn : jn];
 				
 				for (int j=0; j < jn; j++)
@@ -145,7 +146,7 @@ public final class RomsTopLavel
 			res.putAll(u.createDimension(cdf));
 			res.putAll(v.createDimension(cdf));
 			
-			String[] times = {srt_time, sst_time, sss_time, sms_time, shf_time, swf_time, g_time};
+			String[] times = {srf_time, sst_time, sss_time, sms_time, shf_time, swf_time, g_time};
 		
 			for (int i=0; i < times.length; ++i)
 			{
@@ -221,7 +222,7 @@ public final class RomsTopLavel
 		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "shf", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
 		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "sst", "rho"));
 		
-		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srt", "rho")); //Downward_short_wave_flux
+		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srf", "rho")); //Downward_short_wave_flux
 		
 		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "sms", "v"));//Zonal_momentum_flux
 		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "sms", "u")); //Meridional_momentum_flux
