@@ -1,0 +1,347 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"E",
+				"ENDBRAKE"
+			],
+			[
+				"St",
+				"START"
+			],
+			[
+				"b",
+				"body"
+			],
+			[
+				"he",
+				"heappop"
+			],
+			[
+				"co",
+				"count"
+			],
+			[
+				"c",
+				"count"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "GribToNetCDFConvertor.java",
+			"settings":
+			{
+				"buffer_size": 19035,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "Math.java",
+			"settings":
+			{
+				"buffer_size": 3996,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "RomsTopLavel.java",
+			"settings":
+			{
+				"buffer_size": 9023,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "VariablesNums.java",
+			"settings":
+			{
+				"buffer_size": 1360,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 336.0,
+		"selected_items":
+		[
+			[
+				"Git",
+				"Git: Blame"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: g",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 504.0
+	},
+	"console":
+	{
+		"height": 132.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/corwin/Dropbox/Учеба/Moroz2/moroz2.sublime-project",
+		"/home/corwin/Dropbox/Учеба/Moroz2/parser.py",
+		"/home/corwin/Dropbox/Учеба/web_game/client/main.html",
+		"/home/corwin/workspace/web_game/client/js/ai.js",
+		"/home/corwin/workspace/web_game/client/js/game.js",
+		"/home/corwin/workspace/web_game/client/js/main.js",
+		"/home/corwin/workspace/web_game/client/js/utils.js",
+		"/home/corwin/workspace/web_game/client/style.css",
+		"/home/corwin/workspace/web_game/client/main.html",
+		"/home/corwin/workspace/web_game/client/main.html_",
+		"/home/corwin/workspace/web_game/others/kravits_game/client/main.html",
+		"/home/corwin/Dropbox/Учеба/web_game/client/js/main.js",
+		"/home/corwin/workspace/web_game/others/kravits_game/client/js/main.js",
+		"/home/corwin/workspace/web_game/others/kravits_game/client/css/black-tie/jquery-ui-1.8.6.custom.css",
+		"/home/corwin/Dropbox/sinc/sublime-text-2/Packages/Default/Default (Linux).sublime-keymap",
+		"/home/corwin/workspace/web_game/others/web_game/server/actions.py",
+		"/home/corwin/Dropbox/Учеба/Moroz2/rle.py",
+		"/home/corwin/Dropbox/Учеба/Moroz2/hafman.py",
+		"/home/corwin/Dropbox/Учеба/Moroz2/lzw.py",
+		"/home/corwin/Dropbox/Учеба/web_game/src/server.py",
+		"/home/corwin/Dropbox/sinc/sublime-text-2/Packages/Default/Global.sublime-settings",
+		"/home/corwin/Dropbox/sinc/sublime-text-2/Packages/User/Package Control.sublime-settings"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"start",
+			"star\n",
+			"start\n",
+			"stat\n",
+			"star",
+			"    ",
+			"ctrl+`"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"	"
+		],
+		"reverse": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "GribToNetCDFConvertor.java",
+					"settings":
+					{
+						"buffer_size": 19035,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "Math.java",
+					"settings":
+					{
+						"buffer_size": 3996,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "RomsTopLavel.java",
+					"settings":
+					{
+						"buffer_size": 9023,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "VariablesNums.java",
+					"settings":
+					{
+						"buffer_size": 1360,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Java/Java.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 32.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"install",
+				"/home/corwin/Dropbox/sinc/sublime-text-2/Packages/Default/Global.sublime-settings"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}
