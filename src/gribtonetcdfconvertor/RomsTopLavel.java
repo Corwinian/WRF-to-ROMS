@@ -215,6 +215,7 @@ public final class RomsTopLavel
 		resVals.put(VariablesNums.Relative_humidity, new RomsVariable("Relative_humidity", "g", "u"));
 		
 		resVals.put(VariablesNums.SST, new RomsVariable("SST", "sst", "rho"));//Temperature surfase
+		resVals.put(VariablesNums.SSS, new RomsVariable("SSS", "sss", "rho"));//coping param
 		
 		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "g", "u"));
 		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "g", "v"));
@@ -265,6 +266,7 @@ public final class RomsTopLavel
 			case svstr:
 				return grid.v;
 			case SST:
+			case SSS:
 			case swrad:
 			case shflux:
 			case dQdSST:

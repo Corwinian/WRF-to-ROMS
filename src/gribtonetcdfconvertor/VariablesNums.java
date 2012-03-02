@@ -36,7 +36,8 @@ public enum VariablesNums
 	Land_Surface_Precipitation_Accumulation_LSPA(154),
 	Land_cover_land1sea0(81),
 	Evaporation(57),
-	Surface_moment_flux(172)//Surface momentum flux — time-averaged
+	Surface_moment_flux(172),//Surface momentum flux — time-averaged
+	SSS(175)//
 	;	
 
 	private Integer typeValue;
