@@ -24,6 +24,7 @@ import sun.misc.Sort;
 import java.lang.Math;
 
 import java.math.MathContext;
+import ucar.nc2.dt.grid.NetcdfCFWriter;
 
 
  /**
@@ -197,38 +198,12 @@ public class GribToNetCDFConvertor
 		return res;
 	}
 	
-	public static double [][][] getFieldFromFRCFile(
-			NetcdfFile src, 
-			String FieldName, 
-			String gridFile, 
-			RomsTopLavel.RomsGrid.grid grid, 
-			double[] time
-			) throws Exception
+	public static void copyFieldFromFRCFile(NetcdfFile src, String FieldName, String outFile) throws Exception
 	{
-		NetcdfFile grd = NetcdfFile.open(gridFile);
-		Variable var = src.findVariable(FieldName);
-		
-		List<Dimension> dims=var.getDimensions();
-		
-		ucar.ma2.Array varar = var.read();
-		Index ind=varar.getIndex();
-		ind.set(0, 0, 0);
-		double res[][][] = new double[time.length][grid.getLat().length][grid.getLon().length];
-		
-		for (int i=0; i<time.length; i++)
-		{
-			for (int j=0; j<grid.getLat().length; j++)
-			{
-				for (int k=0; k<grid.getLon().length; k++)
-				{
-					res[i][j][k]=varar.getDouble(ind);
-					ind.incr();//set(i,j,k);
-					//System.out.print(String.format("%.2f ", SSTar.getDouble(ind)));
-				}
-			}
-		}
-				
-		return res;
+		NetcdfFileWriteable  dst = NetcdfFileWriteable.openExisting(outFile);
+		ucar.ma2.Array varar = src.findVariable(FieldName).read();
+		dst.write(FieldName, varar);
+		dst.finish();
 	}
 	
 	
@@ -555,20 +530,11 @@ public class GribToNetCDFConvertor
 			
 			RomsTopLavel dest = new RomsTopLavel(outFile, gridFile);
 			
-			{
- 				NetcdfFile frc = NetcdfFile.open(frcFile);
-				//double []sss_time = loadCoords(frc, "sss_time");
-				time = loadCoords(frc, "sss_time");
-				//time = sss_time;
-				dest.createFile(time);
-				
-				dest.writeField(VariablesNums.SSS, 
-						getFieldFromFRCFile(
-						frc, "SSS", gridFile,  
-						dest.grid.rho, time));
-			}
-			
-			
+			NetcdfFile frc = NetcdfFile.open(frcFile);
+			time = loadCoords(frc, "sss_time");
+			dest.createFile(time);
+			copyFieldFromFRCFile(frc, "SSS", outFile);
+
 			GeoRectangle gr = dest.grid.getRectangle();
 			
 			Map<VariablesNums, Data3DField> fields = new HashMap<>(dest.getResVals().size());
