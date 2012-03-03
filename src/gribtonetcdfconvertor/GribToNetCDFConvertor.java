@@ -197,6 +197,41 @@ public class GribToNetCDFConvertor
 		return res;
 	}
 	
+	public static double [][][] getFieldFromFRCFile(
+			NetcdfFile src, 
+			String FieldName, 
+			String gridFile, 
+			RomsTopLavel.RomsGrid.grid grid, 
+			double[] time
+			) throws Exception
+	{
+		NetcdfFile grd = NetcdfFile.open(gridFile);
+		Variable var = src.findVariable(FieldName);
+		
+		List<Dimension> dims=var.getDimensions();
+		
+		ucar.ma2.Array varar = var.read();
+		Index ind=varar.getIndex();
+		ind.set(0, 0, 0);
+		double res[][][] = new double[time.length][grid.getLat().length][grid.getLon().length];
+		
+		for (int i=0; i<time.length; i++)
+		{
+			for (int j=0; j<grid.getLat().length; j++)
+			{
+				for (int k=0; k<grid.getLon().length; k++)
+				{
+					res[i][j][k]=varar.getDouble(ind);
+					ind.incr();//set(i,j,k);
+					//System.out.print(String.format("%.2f ", SSTar.getDouble(ind)));
+				}
+			}
+		}
+				
+		return res;
+	}
+	
+	
 	public static Data3DField getFieldFromSRCFile(NetcdfFile src, String FieldName, GeoRectangle boundaries, double timeMin, double timeMax) throws Exception
 	{
 		return getFieldFromSRCFile(src, FieldName, boundaries, timeMin, timeMax, false);
@@ -505,12 +540,12 @@ public class GribToNetCDFConvertor
 	}
 	
 	//public static void GribToNetCDFConvert(File fileIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
-	public static void GribToNetCDFConvert(List<String>filesIn, String gridFile, String outFile) throws IOException, Exception //, String dstFileName)
+	public static void GribToNetCDFConvert(List<String>filesIn, String gridFile, String frcFile, String outFile) throws IOException, Exception //, String dstFileName)
 	{   
 		NetcdfFile cdf = null;
 		try
 		{ 
-			double[] time = {3, 4, 15, 204, 345, 350} ;//new double[filesIn.size()];
+			double[] time = null;//= {3, 4, 15, 204, 345, 350} ;//new double[filesIn.size()];
 			
 //			for (int i=0; i < filesIn.size() ; ++i)
 //			{
@@ -518,7 +553,22 @@ public class GribToNetCDFConvertor
 //				time[i] = loadCoords(cdf, timeName)[0];
 //			}
 			
-			RomsTopLavel dest = new RomsTopLavel(outFile, gridFile, time);
+			RomsTopLavel dest = new RomsTopLavel(outFile, gridFile);
+			
+			{
+ 				NetcdfFile frc = NetcdfFile.open(frcFile);
+				//double []sss_time = loadCoords(frc, "sss_time");
+				time = loadCoords(frc, "sss_time");
+				//time = sss_time;
+				dest.createFile(time);
+				
+				dest.writeField(VariablesNums.SSS, 
+						getFieldFromFRCFile(
+						frc, "SSS", gridFile,  
+						dest.grid.rho, time));
+			}
+			
+			
 			GeoRectangle gr = dest.grid.getRectangle();
 			
 			Map<VariablesNums, Data3DField> fields = new HashMap<>(dest.getResVals().size());
@@ -529,7 +579,8 @@ public class GribToNetCDFConvertor
 
 				String field = variables.get(neededValues[0]);
 
-				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[0]);
+				Data3DField SST = getFieldFromSRCFile(cdf, field,gr, 3, 3);
+				//Data3DField SST = getFieldFromSRCFile(cdf, field,gr, time[0], time[0]);
 				SST.data = new double[time.length][SST.data[0].length][SST.data[0][0].length];
 				SST.time = time.clone();
 				
@@ -551,7 +602,7 @@ public class GribToNetCDFConvertor
 				for (Iterator<VariablesNums> i = variables.keySet().iterator(); i.hasNext();)
 				{
 					VariablesNums var = i.next();
-					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[0], time[0]);
+					Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, 3, 3);
 					//Data3DField SST = getFieldFromSRCFile(cdf, variables.get(var), gr, time[c], time[c]);
 					fields.get(var).data[c] = SST.data[0].clone();
 				}
@@ -599,7 +650,7 @@ public class GribToNetCDFConvertor
 				System.out.println("windStress");
 				Data3DField[] windStress = CalcWstress(fields.get(VariablesNums.u_wind), fields.get(VariablesNums.v_wind));
 							
-				loaded.put(VariablesNums.sustr, windStress[0]);
+ 				loaded.put(VariablesNums.sustr, windStress[0]);
 				loaded.put(VariablesNums.svstr, windStress[1]);
 			}
 			
@@ -640,6 +691,7 @@ public class GribToNetCDFConvertor
 		String fileIn = "";
 		String fileGrid = "";
 		String fileOut = "";
+		String fileFrc = "";
 		
 		for (int i=0; i < args.length; i+=2)
 		{
@@ -650,11 +702,13 @@ public class GribToNetCDFConvertor
 				filesIn.add(args[i+1]);
 			else if (args[i].equals("-o") || args[i].equals("--output"))
 				fileOut = args[i+1];
+			else if (args[i].equals("-f") || args[i].equals("--forsing"))
+				fileFrc = args[i+1];
 		}
 		
 		File fIn = new File(fileIn);
 		
 		//GribToNetCDFExtractor.printMetaData(fIn);
-		GribToNetCDFConvert(filesIn, fileGrid, fileOut);
+		GribToNetCDFConvert(filesIn, fileGrid, fileFrc, fileOut);
 	}
 }

@@ -200,7 +200,7 @@ public final class RomsTopLavel
 	
 	public Map<VariablesNums, RomsVariable> getResVals() {return resVals;}
 	
-	public RomsTopLavel(String dst_file, String gridFile, double  []time) throws IOException
+	public RomsTopLavel(String dst_file, String gridFile) throws IOException
 	{
 		grid = new RomsGrid(gridFile);
 		resVals = new HashMap<>(24);
@@ -239,7 +239,6 @@ public final class RomsTopLavel
 		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "g", "u"));
 		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "g", "u"));
 		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "g", "u"));
-		createFile(time);
 	}
 	
 	public RomsGrid.grid  getGridForVariable(VariablesNums varNum)
