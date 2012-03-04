@@ -182,14 +182,15 @@ public final class RomsTopLavel
 	class RomsVariable
 	{
 		public String name;
-		public String timeName, lonName, latName;
+		public String timeName, lonName, latName, unit;
 		
-		public RomsVariable(String Name, String time, String type)
+		public RomsVariable(String Name, String time, String type, String units)
 		{
 			name = Name;
 			timeName = String.format("%s_time", time);
 			lonName = String.format("lon_%s", type);
 			latName = String.format("lat_%s", type);
+			unit =units ;
 		}
 	};
 	
@@ -210,39 +211,45 @@ public final class RomsTopLavel
 		dstFile = dst_file;
 		
 		//TODO:
-		resVals.put(VariablesNums.Pressure, new RomsVariable("Pressure", "g", "u"));
-		resVals.put(VariablesNums.Geopotential_height, new RomsVariable("Geopotential_height", "g", "u"));
+		resVals.put(VariablesNums.Pressure, 
+				new RomsVariable("Pressure", "g", "u", "Pa"));
+		resVals.put(VariablesNums.Geopotential_height, 
+				new RomsVariable("Geopotential_height", "g", "u", "gpm"));
 		
-		resVals.put(VariablesNums.Potential_temperature, new RomsVariable("Potential_temperature", "g", "u"));
-		resVals.put(VariablesNums.Specific_humidity, new RomsVariable("Specific_humidity", "g", "u"));
-		resVals.put(VariablesNums.Relative_humidity, new RomsVariable("Relative_humidity", "g", "u"));
+		resVals.put(VariablesNums.Potential_temperature, 
+				new RomsVariable("Potential_temperature", "g", "u", "Celsius"));
+		resVals.put(VariablesNums.Specific_humidity, 
+				new RomsVariable("Specific_humidity", "g", "u", "kg/gk"));
+		resVals.put(VariablesNums.Relative_humidity, 
+				new RomsVariable("Relative_humidity", "g", "u", "%"));
 		
-		resVals.put(VariablesNums.SST, new RomsVariable("SST", "sst", "rho"));//Temperature surfase
-		resVals.put(VariablesNums.SSS, new RomsVariable("SSS", "sss", "rho"));//coping param
+		resVals.put(VariablesNums.SST, new RomsVariable("SST", "sst", "rho","Celsius"));//Temperature surfase
+		resVals.put(VariablesNums.SSS, new RomsVariable("SSS", "sss", "rho", "psu"));//coping param
 		
-		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "g", "u"));
-		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "g", "v"));
+		resVals.put(VariablesNums.u_wind, new RomsVariable("u_wind", "g", "u", "m/s"));
+		resVals.put(VariablesNums.v_wind, new RomsVariable("v_wind", "g", "v", "m/s"));
 		
-		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "shf", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
-		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "sst", "rho"));
-		resVals.put(VariablesNums.swflux, new RomsVariable("swflux", "swf", "rho"));
+		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "shf", "rho", "Watts meter-2")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
+		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "sst", "rho","Watts meter-2 Celsius-1"));
+		resVals.put(VariablesNums.swflux, new RomsVariable("swflux", "swf", "rho","centimeter day-1"));
 		
-		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srf", "rho")); //Downward_short_wave_flux
+		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srf", "rho", "Watts meter-2")); //Downward_short_wave_flux
 		
-		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "sms", "v"));//Zonal_momentum_flux
-		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "sms", "u")); //Meridional_momentum_flux
+		resVals.put(VariablesNums.svstr, new RomsVariable("svstr", "sms", "v", "Newton meter-2"));//Zonal_momentum_flux
+		resVals.put(VariablesNums.sustr, new RomsVariable("sustr", "sms", "u", "Newton meter-2")); //Meridional_momentum_flux
 		//FEXME: подумать над названием 
-		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "g", "u"));
+		resVals.put(VariablesNums.Sensible_heat_flux, new RomsVariable("Sensible_heat_flux", "g", "u", "W/m^2"));
 		
-		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "g", "u"));
-		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "g", "u"));
+		resVals.put(VariablesNums.Ground_heat_flux, new RomsVariable("Ground_heat_flux", "g", "u"," W/m^2"));
+		resVals.put(VariablesNums.Latent_heat_flux, new RomsVariable("Latent_heat_flux", "g", "u", "W/m^2"));
 		
-		resVals.put(VariablesNums.Ice_thickness, new RomsVariable("Ice_thickness", "g", "u"));
-		resVals.put(VariablesNums.Ice_concentration_ice1no_ice0, new RomsVariable("Ice_concentration_ice1no_ice0", "g", "u"));
+		resVals.put(VariablesNums.Ice_thickness, new RomsVariable("Ice_thickness", "g", "u", "m"));
+		resVals.put(VariablesNums.Ice_concentration_ice1no_ice0, new RomsVariable("Ice_concentration_ice1no_ice0", "g", "u", "fraction"));
 		
-		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "g", "u"));
-		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "g", "u"));
-		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "g", "u"));
+		resVals.put(VariablesNums.Land_Surface_Precipitation_Accumulation_LSPA, 
+				new RomsVariable("Land_Surface_Precipitation_Accumulation_LSPA", "g", "u", "kg/m2")); 
+		resVals.put(VariablesNums.Land_cover_land1sea0, new RomsVariable("Land_cover_land1sea0", "g", "u", " "));//не нашел для них координаты
+		resVals.put(VariablesNums.Evaporation, new RomsVariable("Evaporation", "g", "u", "kg/m^2"));
 	}
 	
 	public RomsGrid.grid  getGridForVariable(VariablesNums varNum)
