@@ -103,13 +103,16 @@ public final class RomsTopLavel
 				Dimension lonDim = cdf.addDimension(lon_name, lon[0].length),
 						latDim = cdf.addDimension(lat_name, lat[0].length);
 		
+				
 				Dimension[] lodim = new Dimension[1];
 				lodim[0] = lonDim;
-				cdf.addVariable(lon_name, DataType.DOUBLE, lodim);
+				Variable varr = cdf.addVariable(lon_name, DataType.DOUBLE, lodim);
+				 varr.addAttribute(new Attribute("units", "degree_east"));
 				
 				Dimension[] latim = new Dimension[1];
 				latim[0] = latDim;
-				cdf.addVariable(lat_name, DataType.DOUBLE, latim);
+				varr =	cdf.addVariable(lat_name, DataType.DOUBLE, latim);
+				varr.addAttribute(new Attribute("units", "degree_noth"));
 				
 				res.put(lat_name, latDim);
 				res.put(lon_name, lonDim);
@@ -154,8 +157,8 @@ public final class RomsTopLavel
 			
 				Dimension[] tidim = new Dimension[1];
 				tidim[0] = timeDim;
-				cdf.addVariable(times[i], DataType.DOUBLE, tidim);
-				
+				Variable varr= cdf.addVariable(times[i], DataType.DOUBLE, tidim);
+				varr.addAttribute(new Attribute("units", "days"));
 				res.put(times[i], timeDim);
 			}
 			
