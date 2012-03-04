@@ -319,6 +319,8 @@ public final class RomsTopLavel
 	 			varr.addAttribute(new Attribute("GRIB_param_number", num.getTypeValue()));
 				varr.addAttribute(new Attribute("GRIB_param_name", var.name));
 				
+				varr.addAttribute(new Attribute("units", var.unit));
+				
 				varr.addAttribute(new Attribute("coordinates", String.format("%s %s", var.lonName, var.latName)));
 				varr.addAttribute(att);
 			}
