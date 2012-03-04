@@ -619,6 +619,11 @@ public class GribToNetCDFConvertor
 							
  				loaded.put(VariablesNums.sustr, windStress[0]);
 				loaded.put(VariablesNums.svstr, windStress[1]);
+				
+				System.out.println("SST");
+				fields.get(VariablesNums.SST).KelvinToCelsius(); 
+				fields.get(VariablesNums.Temperature).KelvinToCelsius(); 
+				System.out.println("end calc");
 			}
 			
 			for(Iterator<VariablesNums> i = loaded.keySet().iterator(); i.hasNext();)
