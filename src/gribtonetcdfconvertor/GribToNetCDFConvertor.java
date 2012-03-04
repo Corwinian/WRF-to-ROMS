@@ -534,6 +534,7 @@ public class GribToNetCDFConvertor
 			time = loadCoords(frc, "sss_time");
 			dest.createFile(time);
 			copyFieldFromFRCFile(frc, "SSS", outFile);
+			copyFieldFromFRCFile(frc, "swflux", outFile);
 
 			GeoRectangle gr = dest.grid.getRectangle();
 			

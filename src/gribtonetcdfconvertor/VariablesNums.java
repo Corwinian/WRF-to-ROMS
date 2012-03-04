@@ -19,6 +19,7 @@ public enum VariablesNums
 	Temperature(12),
 	u_wind(33),
 	v_wind(34),
+	swflux(309),
 	shflux(207),
 	dQdSST(208),
 	swrad (206),

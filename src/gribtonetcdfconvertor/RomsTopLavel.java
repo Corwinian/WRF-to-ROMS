@@ -222,6 +222,7 @@ public final class RomsTopLavel
 		
 		resVals.put(VariablesNums.shflux, new RomsVariable("shflux", "shf", "rho")); // sum wave flux (номер указал от балды тк не нашел каой правильный)
 		resVals.put(VariablesNums.dQdSST, new RomsVariable("dQdSST", "sst", "rho"));
+		resVals.put(VariablesNums.swflux, new RomsVariable("swflux", "swf", "rho"));
 		
 		resVals.put(VariablesNums.swrad, new RomsVariable("swrad", "srf", "rho")); //Downward_short_wave_flux
 		
